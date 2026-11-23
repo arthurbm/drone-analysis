@@ -1,1 +1,3 @@
 *.zip
+# conversa do grupo e prints: contêm telefones e e-mails, não versionar
+data/
