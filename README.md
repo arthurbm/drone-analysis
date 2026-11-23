@@ -9,11 +9,11 @@ Equipe: Ana Maria Cunha, Mateus Ferreira Borges e Arthur Britto.
 | Caminho | O que é |
 |---|---|
 | `ProjetoSinaisESistemas.ipynb` | Notebook completo da 1ª entrega (seções 1 a 5), com código, gráficos e interpretações |
-| `secao4_celulas.ipynb` | Só as células da seção 4, já executadas, para copiar para o Colab compartilhado |
-| `relatorio/` | Relatório em LaTeX (modelo IEEE) e o trecho da seção 4 (`secao4_comparacao_dominios.tex`) |
+| `relatorio/` | Relatório da 1ª entrega em PDF e os fontes em LaTeX (modelo IEEE) |
+| `repasses/` | Pacotes prontos para colar no Colab e no Overleaf do grupo, que são as versões oficiais do notebook e do relatório |
+| `docs/enunciado/` | Enunciado oficial (`enunciado.pdf`) e slides de apresentação do projeto (`slides.pdf`) |
 | `GLOSSARY.md` | Vocabulário do projeto: o que significa cada termo usado no notebook e no relatório |
-| `Projeto Sinais e Sistemas 2026.2.pdf` | Enunciado oficial |
-| `Projeto de Sinais e Sistemas 2026.2.pdf` | Slides de apresentação do projeto |
+| `AGENTS.md`, `docs/agents/` | Instruções para assistentes de código que trabalham neste repositório |
 
 ## Como executar
 
