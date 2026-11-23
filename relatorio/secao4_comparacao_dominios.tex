@@ -1,0 +1,39 @@
+% Seção 4 do relatório — colar no Overleaf no lugar da seção
+% "Comparação dos domínios e seleção de atributos".
+% Requer: figuras/comparacao_dominios.png (gerada pela seção 4.4 do notebook como comp_dominios_relatorio.png)
+% Usa apenas pacotes já carregados no preâmbulo (booktabs, graphicx) e a macro \U.
+
+\section{Comparação dos domínios e seleção de atributos}
+As características temporais e espectrais foram calculadas nas mesmas 720 janelas dos mesmos 12 registros. Para medir quanto cada uma separa as condições, usamos o $d$ de Cohen (diferença entre as médias, em desvios padrão) e a AUC (probabilidade de uma janela danificada ter valor maior que uma saudável; 0,5 indica nenhuma separação). Além das potências absolutas por banda, calculamos a \textbf{fração} da potência em cada banda (potência da banda dividida pela potência total da janela), que descreve a forma do espectro sem depender da intensidade. A Tabela~\ref{tab:comp} resume os resultados; as bandas citadas são B2 (200--335~Hz) e B3 (335--600~Hz).
+
+\begin{table}[!t]
+\caption{Separação entre condições: $d$ de Cohen e AUC com todas as janelas danificadas juntas, e $d$ de cada grupo de falha em relação às saudáveis.}
+\label{tab:comp}\centering\small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+ & \multicolumn{2}{c}{Todas} & \multicolumn{3}{c}{$d$ por grupo}\\\cmidrule(lr){2-3}\cmidrule(l){4-6}
+Característica & $d$ & AUC & F1 & F2 & F3\\\midrule
+RMS & $0{,}30$ & 0,51 & $+1{,}34$ & $-0{,}16$ & $-0{,}27$\\
+Fator de crista & $0{,}09$ & 0,52 & $-0{,}88$ & $+0{,}41$ & $+0{,}61$\\\midrule
+Freq. dominante & $0{,}07$ & 0,31 & $-1{,}25$ & $+1{,}07$ & $+0{,}23$\\
+Centroide & $0{,}17$ & 0,56 & $-1{,}61$ & $+1{,}57$ & $+0{,}71$\\
+Entropia & $0{,}07$ & 0,53 & $-0{,}92$ & $+0{,}56$ & $+0{,}49$\\
+Fração em B2 & $-1{,}38$ & 0,27 & $-1{,}45$ & $-0{,}79$ & $-0{,}98$\\
+Fração em B3 & $0{,}69$ & 0,69 & $-0{,}85$ & $+3{,}06$ & $+1{,}30$\\\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{A classe danificada não é homogênea.} Com as nove falhas reunidas, o RMS praticamente não separa as condições ($d=0{,}30$; AUC $=0{,}51$). Separando por grupo, os efeitos têm sentidos opostos: F1 aumenta a intensidade (RMS: $d=+1{,}34$) e concentra a energia nas baixas frequências; F2 mantém a intensidade ($d=-0{,}16$) e desloca a energia para B3 ($d=+3{,}06$); F3 fica entre os dois. Nenhum domínio é superior em todos os casos: as medidas de intensidade destacam F1, e as de distribuição da energia destacam F2 e F3.
+
+\begin{figure*}[!t]
+\centering\includegraphics[width=0.92\textwidth]{figuras/comparacao_dominios.png}
+\caption{(a) RMS (tempo) contra a fração da potência em 335--600~Hz (frequência); cada ponto é uma janela de 1~s do piezo, SP3/C1. (b) Frequência do pico entre 100 e 160~Hz contra a tensão média da bateria; cada ponto é um registro. Os quadrados são os nove registros danificados de SP3/C2, usados apenas nesta verificação.}
+\label{fig:comp}
+\end{figure*}
+
+\textbf{Achado 1: mesma intensidade, espectros diferentes.} Na Fig.~\ref{fig:comp}(a), janelas com o mesmo RMS têm distribuições de energia muito distintas. Entre as janelas com RMS na faixa central das saudáveis (0,24 a 0,31~$\U$), a fração média em B3 é 36\% nas saudáveis, 17\% em F1 e 74\% em F2. O tempo mede quanto o sinal vibra; a frequência mostra onde essa energia está.
+
+\textbf{Achado 2: a posição dos picos acompanha a bateria.} O deslocamento do pico principal (133 para 128~Hz na média das danificadas) é invisível no tempo, pois equivale a 0,3~ms no período. Porém, a frequência desse pico acompanha a tensão da bateria registrada nos arquivos (Fig.~\ref{fig:comp}(b)): $r=0{,}992$ nos 12 registros de C1 e $r=0{,}995$ com os nove registros danificados de C2 ($\approx 7$~Hz/V). Os saudáveis foram gravados com 15,4 a 15,5~V e os danificados com 14,3 a 15,3~V; a mesma falha F1/SV1 tem o pico em 130,1~Hz a 14,97~V (C1) e em 135,1~Hz a 15,65~V (C2), acima dos saudáveis. Assim, o deslocamento dos picos é explicado pela tensão da bateria e, com estes dados, não pode ser atribuído ao defeito. O padrão é compatível com variação da rotação dos motores, que o dataset não informa.
+
+\textbf{Redundância e conjunto para a classificação.} RMS, desvio padrão, potência média, potência espectral total, picos e magnitude do pico dominante medem a mesma intensidade ($r \geq 0{,}92$ entre janelas); as potências absolutas por banda também a acompanham ($r$ de 0,76 a 0,99 com o RMS). A fração em B1 e o centroide são redundantes com a fração em B3 ($r=-0{,}97$ e $+0{,}90$). Propomos, para a segunda entrega: modelo temporal com \textbf{RMS e fator de crista}; modelo espectral com \textbf{frações em B2 e B3 e entropia espectral}; e modelo combinado com as cinco. A frequência dominante e a frequência do pico ficam fora por acompanharem a bateria. Todas as características mínimas continuam extraídas e analisadas.
+
+\textbf{Limitações.} As 720 janelas vêm de 12 registros, dos quais três são saudáveis, e estes diferem entre si em grau semelhante à diferença entre condições. A tensão da bateria difere sistematicamente entre as classes e também se relaciona, de forma mais fraca, com a fração em B3 ($r\approx-0{,}6$ por registro), o que registramos como risco de confusão.
