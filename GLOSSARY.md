@@ -11,7 +11,7 @@ Um ensaio gravado, guardado em um arquivo `.mat` do dataset; contém o sinal do 
 _Avoid_: arquivo (quando se fala do ensaio), experimento, gravação, amostra
 
 **Janela**:
-Trecho de 1 s de um registro, sem sobreposição com os vizinhos; é a unidade em que as características são calculadas.
+Subdivisão de duração fixa de um registro (1 s neste projeto), sem sobreposição com as vizinhas; é a unidade em que as características são calculadas.
 _Avoid_: trecho, segmento, amostra, frame
 
 **Amostra**:
@@ -100,23 +100,23 @@ Pico absoluto dividido pelo RMS; indica o quanto o maior valor se destaca do ní
 Representação da janela que mostra a amplitude da vibração em cada frequência.
 _Avoid_: FFT (é o algoritmo que calcula o espectro, não o resultado)
 
-**Pico**:
-Frequência em que o espectro tem um máximo local, isto é, uma componente periódica que se destaca.
+**Pico espectral**:
+Frequência em que o espectro tem um máximo local, isto é, uma componente periódica que se destaca. É diferente do pico absoluto, que é o maior valor da janela no tempo.
 _Avoid_: harmônico, linha (sem evidência do que a origina)
 
 **Frequência dominante**:
-Frequência do maior pico do espectro da janela.
+Frequência do maior pico espectral da janela.
 
 **Banda**:
-Faixa fixa de frequências, igual para todas as condições (B1 a B4).
-_Avoid_: faixa, intervalo
+Divisão fixa do eixo de frequências, igual para todas as condições (B1 a B4).
+_Avoid_: faixa, intervalo (ao se referir a B1–B4)
 
 **Potência na banda**:
 Parcela da potência da janela que está dentro de uma banda, em valor absoluto.
 
-**Fração na banda**:
+**Fração da potência na banda**:
 Potência na banda dividida pela potência total da janela; descreve a forma do espectro sem depender da intensidade.
-_Avoid_: potência relativa, percentual da banda
+_Avoid_: fração na banda, potência relativa, percentual da banda
 
 **Centroide espectral**:
 Frequência média do espectro, ponderada pela potência em cada frequência; funciona como o "centro de massa" do espectro.

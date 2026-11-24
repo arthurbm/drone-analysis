@@ -33,7 +33,7 @@ Registros usados (sensor piezoelétrico `AccData`, 10 kHz, 60 s cada):
 
 - **Análise principal (SP3/C1):** `F0_SV0_SP3_C1_R1`, `R2`, `R3` (saudáveis) e `F{1,2,3}_SV{1,2,3}_SP3_C1` (nove danificados).
 - **Investigação adicional:** os mesmos 12 registros, com os três eixos da IMU (`IMUData`, 1 kHz).
-- **Verificação da bateria (seção 4.4):** `F{1,2,3}_SV{1,2,3}_SP3_C2`, usados somente para comparar a frequência do pico com a tensão da bateria.
+- **Verificação da tensão da bateria (seção 4.4):** `F{1,2,3}_SV{1,2,3}_SP3_C2`, usados somente para comparar a frequência do pico com a tensão da bateria.
 
 ## Entregas
 
