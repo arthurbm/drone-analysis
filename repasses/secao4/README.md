@@ -19,7 +19,7 @@ A seção 4.4 lê também os nove registros danificados de SP3/C2, a partir da t
 3. Faça os três ajustes abaixo em outras seções, para que o relatório não contradiga a seção nova.
 4. Compile. O trecho ocupa quase duas colunas, cerca de uma página: uma coluna de texto e títulos, a Tabela `tab:comp` (cerca de 0,3 coluna) e a figura (cerca de 0,5 coluna).
 
-O trecho ainda não foi compilado: confira a tabela, a figura e o limite de 6 páginas. Se faltar espaço, remova a Tabela `tab:comp` antes da figura, que é a que sustenta os dois achados; nesse caso, troque a frase "A Tabela~\ref{tab:comp} mostra o motivo:" por "O motivo é que" (os valores de $d$ citados no texto continuam valendo).
+Compilada localmente com pdfLaTeX, a cópia do relatório com o trecho e os três ajustes tem 6 páginas, sem erros, e a seção nova cabe inteira na página 5; `relatorio/Projeto_Sinais_26_2.pdf` é essa compilação. Confira o mesmo no Overleaf. Se lá faltar espaço, remova a Tabela `tab:comp` antes da figura, que é a que sustenta os dois achados; nesse caso, troque a frase "A Tabela~\ref{tab:comp} mostra o motivo:" por "O motivo é que" (os valores de $d$ citados no texto continuam valendo).
 
 ### Ajustes em outras seções
 

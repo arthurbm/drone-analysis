@@ -9,7 +9,7 @@ Equipe: Ana Maria Cunha, Mateus Ferreira Borges e Arthur Britto.
 | Caminho | O que é |
 |---|---|
 | `analise_vibracao_drones.ipynb` | Notebook completo da 1ª entrega (seções 1 a 5), com código, gráficos e interpretações |
-| `relatorio/` | Relatório da 1ª entrega em PDF e os fontes em LaTeX (modelo IEEE) |
+| `relatorio/` | Relatório da 1ª entrega: fontes em LaTeX (modelo IEEE) e o PDF compilado a partir deles |
 | `repasses/` | Pacotes prontos para colar no Colab e no Overleaf do grupo, que são as versões oficiais do notebook e do relatório |
 | `docs/enunciado/` | Enunciado oficial (`enunciado.pdf`) e slides de apresentação do projeto (`slides.pdf`) |
 | `GLOSSARY.md` | Vocabulário do projeto: o que significa cada termo usado no notebook e no relatório |
@@ -26,7 +26,7 @@ uv sync
 uv run jupyter lab analise_vibracao_drones.ipynb
 ```
 
-Os caminhos do notebook apontam para `/content/`, que é a pasta do Colab. Para rodar fora dele, baixe o dataset e ajuste os dois caminhos da primeira célula e o padrão de busca da célula de exploração (`/content/dados/**/*.mat`).
+Os caminhos do notebook apontam para `/content/`, que é a pasta do Colab. Para rodar fora dele, ajuste os dois caminhos da primeira célula e o padrão de busca da célula de exploração (`/content/dados/**/*.mat`). Na primeira célula, tire também a opção `--id` do `gdown`: a versão instalada pelo `uv` não a aceita mais.
 
 ## Dataset
 

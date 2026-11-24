@@ -169,7 +169,7 @@ O filtro antialias atenua componentes altas \emph{antes} da redução. O espectr
 
 \clearpage
 \section{Comparação entre os domínios}\label{sec:comp}
-Nas mesmas 720 janelas, medimos quanto cada característica separa as condições com o $d$ de Cohen (diferença entre as médias, em desvios padrão) e a AUC (probabilidade de uma janela danificada ter valor maior que uma saudável; 0,5 indica nenhuma separação). Incluímos as \textbf{frações} da potência por banda (potência na banda dividida pela potência total da janela), que descrevem a forma do espectro sem depender da intensidade.
+Nas mesmas 720 janelas, medimos quanto cada característica separa as condições com o $d$ de Cohen (diferença entre as médias, em desvios padrão) e a AUC (probabilidade de uma janela danificada ter valor maior que uma saudável; 0,5 indica que um valor maior não aponta para nenhuma das condições). Incluímos as \textbf{frações} da potência por banda (potência na banda dividida pela potência total da janela), que descrevem a forma do espectro sem depender da intensidade.
 
 \begin{table}[!ht]
 \caption{Separação entre condições: $d$ de Cohen e AUC com os nove registros danificados reunidos, e $d$ de cada grupo de falha em relação às janelas saudáveis.}
@@ -177,17 +177,17 @@ Nas mesmas 720 janelas, medimos quanto cada característica separa as condiçõe
 \begin{tabular}{@{}lrrrrr@{}}\toprule
  & \multicolumn{2}{c}{Reunidos} & \multicolumn{3}{c}{$d$ por grupo}\\\cmidrule(lr){2-3}\cmidrule(l){4-6}
 Característica & $d$ & AUC & F1 & F2 & F3\\\midrule
-RMS & $+0,30$ & $0,51$ & $+1,34$ & $-0,16$ & $-0,27$\\
-Fator de crista & $+0,09$ & $0,52$ & $-0,88$ & $+0,41$ & $+0,61$\\\midrule
-Freq. dominante & $+0,07$ & $0,31$ & $-1,25$ & $+1,07$ & $+0,23$\\
-Centroide & $+0,17$ & $0,56$ & $-1,61$ & $+1,57$ & $+0,71$\\
-Entropia & $+0,07$ & $0,53$ & $-0,92$ & $+0,56$ & $+0,49$\\
-Fração em B2 & $-1,38$ & $0,27$ & $-1,45$ & $-0,79$ & $-0,98$\\
-Fração em B3 & $+0,69$ & $0,69$ & $-0,85$ & $+3,06$ & $+1,30$\\\bottomrule
+RMS & $+0{,}30$ & $0{,}51$ & $+1{,}34$ & $-0{,}16$ & $-0{,}27$\\
+Fator de crista & $+0{,}09$ & $0{,}52$ & $-0{,}88$ & $+0{,}41$ & $+0{,}61$\\\midrule
+Freq. dominante & $+0{,}07$ & $0{,}31$ & $-1{,}25$ & $+1{,}07$ & $+0{,}23$\\
+Centroide & $+0{,}17$ & $0{,}56$ & $-1{,}61$ & $+1{,}57$ & $+0{,}71$\\
+Entropia & $+0{,}07$ & $0{,}53$ & $-0{,}92$ & $+0{,}56$ & $+0{,}49$\\
+Fração em B2 & $-1{,}38$ & $0{,}27$ & $-1{,}45$ & $-0{,}79$ & $-0{,}98$\\
+Fração em B3 & $+0{,}69$ & $0{,}69$ & $-0{,}85$ & $+3{,}06$ & $+1{,}30$\\\bottomrule
 \end{tabular}
 \end{table}
 
-Com os nove registros danificados reunidos, o RMS não separa as condições ($d=+0,30$; $\mathrm{AUC}=0,51$). A Tabela~\ref{tab:comp} mostra o motivo: os grupos de falha têm efeitos de sentidos opostos. F1 aumenta a intensidade (RMS: $d=+1,34$) e concentra a potência nas baixas frequências; F2 mantém a intensidade e eleva a fração em B3 ($d=+3,06$); F3 reduz levemente o RMS ($d=-0,27$) e também eleva a fração em B3 ($d=+1,30$). Os domínios são complementares: a intensidade destaca F1, e a distribuição da potência distingue F2 e F3, em que o RMS pouco muda.
+Com os nove registros danificados reunidos, um RMS maior quase não indica dano ($d=+0{,}30$; $\mathrm{AUC}=0{,}51$). A Tabela~\ref{tab:comp} mostra o motivo: os grupos de falha têm efeitos de sentidos opostos. F1 aumenta a intensidade (RMS: $d=+1{,}34$) e concentra a potência nas baixas frequências; F2 mantém a intensidade e eleva a fração em B3 ($d=+3{,}06$); F3 reduz levemente o RMS ($d=-0{,}27$) e também eleva a fração em B3 ($d=+1{,}30$). Os domínios são complementares: a intensidade destaca F1, e a distribuição da potência distingue F2 e F3, em que o RMS pouco muda.
 
 \fig{09_notebook_comparacao}{(a) RMS contra fração da potência em B3, por janela de 1~s. (b) Frequência do pico em 100--160~Hz contra tensão média da bateria, por registro (quadrados: nove registros danificados de SP3/C2, usados só nesta verificação).}{fig:comp}
 
@@ -195,10 +195,10 @@ Com os nove registros danificados reunidos, o RMS não separa as condições ($d
 Na Fig.~\ref{fig:comp}(a), janelas com o mesmo RMS têm distribuições de potência muito distintas. Entre as janelas com RMS na faixa central das saudáveis (0,24 a 0,31~$\U$), a fração média em B3 é 36\% nas saudáveis, 17\% em F1 e 74\% em F2. O tempo mede quanto o sinal vibra; a frequência mostra onde essa potência está.
 
 \subsection{Posição dos picos e tensão da bateria}
-O deslocamento do pico principal (133~Hz nos saudáveis; 128~Hz, em média, nos danificados; cerca de 0,3~ms no período) não aparece nas características temporais, mas acompanha a tensão da bateria nos registros (Fig.~\ref{fig:comp}(b)): $r=0,992$ nos 12 de C1 e $r=0,995$ incluindo os nove danificados de SP3/C2 ($\approx7$~Hz/V). Os saudáveis foram gravados a 15,4--15,5~V e os danificados a 14,3--15,3~V; F1/SV1 vai de 130,1~Hz (14,97~V, C1) a 135,1~Hz (15,65~V, C2), acima dos saudáveis. Assim, o deslocamento não pode ser atribuído ao defeito; o padrão é compatível com variação na rotação dos motores, não informada no dataset.
+O deslocamento do pico principal (133~Hz nos saudáveis; 128~Hz, em média, nos danificados; cerca de 0,3~ms no período) não aparece nas características temporais, mas acompanha a tensão da bateria nos registros (Fig.~\ref{fig:comp}(b)): $r=0{,}992$ nos 12 de C1 e $r=0{,}995$ incluindo os nove danificados de SP3/C2 ($\approx7$~Hz/V). Os saudáveis foram gravados a 15,4--15,5~V e os danificados de C1 a 14,3--15,3~V; F1/SV1 vai de 130,1~Hz (14,97~V, C1) a 135,1~Hz (15,65~V, C2), acima dos saudáveis. Assim, o deslocamento não pode ser atribuído ao defeito; o padrão é compatível com variação na rotação dos motores, não informada no dataset.
 
 \subsection{Redundância e seleção de características}
-Desvio padrão, potência média, potência espectral total, picos e magnitude do pico dominante acompanham o RMS ($r\geq0,92$ entre janelas), assim como as potências absolutas por banda ($r$ de 0,76 a 0,99). A fração em B1 é redundante com a fração em B3 ($r=-0,97$), e o centroide acompanha ambas ($r=-0,94$ com B1). Mantendo características pouco redundantes que cobrem os três grupos (a fração em B2 cai em todos; $d=-1,38$ com os registros reunidos), propomos para a segunda entrega: modelo temporal com \textbf{RMS e fator de crista}; espectral com \textbf{frações em B2 e B3 e entropia}; combinado com as cinco. A frequência dominante fica fora por alternar entre dois picos e acompanhar a tensão da bateria. A fração em B3 também se relaciona com a tensão, de forma mais fraca ($r=-0,59$ em 21 registros): tratamos a tensão da bateria como variável de confusão a acompanhar na classificação.
+Desvio padrão, potência média, potência espectral total, picos e magnitude do pico dominante acompanham o RMS ($r\geq0{,}92$ entre janelas), assim como as potências absolutas por banda ($r$ de 0,76 a 0,99). A fração em B1 é redundante com a fração em B3 ($r=-0{,}97$), e o centroide acompanha ambas ($r=-0{,}94$ com B1). Mantendo características pouco redundantes que cobrem os três grupos (a fração em B2 cai em todos; $d=-1{,}38$ com os registros reunidos), propomos para a segunda entrega: modelo temporal com \textbf{RMS e fator de crista}; espectral com \textbf{frações em B2 e B3 e entropia}; combinado com as cinco. A frequência dominante fica fora por alternar entre dois picos, cujas posições acompanham a tensão da bateria. A fração em B3 também se relaciona com a tensão, de forma mais fraca ($r=-0{,}59$ em 21 registros): tratamos a tensão da bateria como variável de confusão a acompanhar na classificação.
 
 \section{Investigação adicional: a direção faz diferença?}
 \textbf{Pergunta:} as vibrações nos eixos $x$, $y$ e $z$ da IMU têm as mesmas características, e a diferença saudável--danificada aparece igualmente nas três direções? A pergunta verifica o que se perde ao observar uma única direção e qual eixo merece atenção em uma aplicação futura.
