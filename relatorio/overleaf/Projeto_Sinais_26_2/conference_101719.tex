@@ -1,261 +1,246 @@
 \documentclass[conference,a4paper]{IEEEtran}
-\IEEEoverridecommandlockouts
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{xcolor}
-\usepackage{booktabs}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
 \usepackage[hidelinks]{hyperref}
-\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
-\newcommand{\pendente}[1]{\par\smallskip{\color{red}\textbf{A completar:} #1}\par\smallskip}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{7pt plus 2pt minus 2pt}
 \newcommand{\U}{\mathrm{m}/\mathrm{s}^{2}}
+\newcommand{\PU}{(\mathrm{m}/\mathrm{s}^{2})^{2}}
+\newcommand{\fig}[3]{\begin{figure}[!ht]\centering\includegraphics[width=\columnwidth]{figuras/#1.png}\caption{#2}\label{#3}\end{figure}}
 \renewcommand{\IEEEkeywordsname}{Palavras-chave}
 \begin{document}
-
-\title{Análise temporal e espectral de vibrações de drones\\[0.4em]
-\large Relatório parcial --- Primeira entrega de Sinais e Sistemas}
+\title{Análise temporal e espectral de vibrações de drones\\[0.3em]
+\large Primeira entrega de Sinais e Sistemas}
 \author{\IEEEauthorblockN{Ana Maria Cunha \quad Arthur Britto \quad Mateus Ferreira Borges}
 \IEEEauthorblockA{CIN0020 --- Sinais e Sistemas, 2026.2}}
 \maketitle
-
 \begin{abstract}
-Este trabalho tem como objetivo analisar padrões de vibração de drones a partir de sinais de aceleração vindos do dataset DronePropB e comparar condições de hélices saudáveis e danificadas nos domínios do tempo e da frequência. O dataset contém 111 experimentos em arquivos MATLAB, todos com uma série de um sensor piezoelétrico e 108 também com três séries de uma IMU (Unidade de Medição Inercial).
+Este trabalho tem como objetivo analisar padrões de vibração de drones a partir de sinais de aceleração do dataset DronePropB e comparar condições de hélices saudáveis e danificadas nos domínios do tempo e da frequência. O dataset contém 111 experimentos em arquivos MATLAB, todos com uma série de um sensor piezoelétrico e 108 também com três séries de uma IMU (Unidade de Medição Inercial). A partir de registros com configurações operacionais comparáveis, são extraídas características temporais e espectrais para investigar a intensidade e a distribuição em frequência das vibrações. O estudo inclui os efeitos da duração dos trechos e da taxa de amostragem na análise espectral, além de uma investigação das diferenças entre os três eixos da IMU.
+
 \end{abstract}
 \begin{IEEEkeywords}
-vibração, drones, FFT, amostragem, análise temporal, análise espectral.
+vibração, drones, FFT, amostragem, características de sinais.
 \end{IEEEkeywords}
 
-\section{Contextualização e objetivo}
-Motores e hélices de drones produzem vibrações mecânicas durante o funcionamento. Danos, deformações e desgaste podem modificar a intensidade e a composição em frequência dessas vibrações. A análise desses padrões a partir de sinais de aceleração permite aplicar os conceitos de caracterização de sinais, potência, Transformada de Fourier e amostragem ao monitoramento das condições físicas do drone.
+\section{Do problema aos sinais selecionados}
+Danos nas hélices podem alterar tanto a intensidade quanto a distribuição em frequência das vibrações de um drone. Nosso objetivo é verificar o que cada domínio revela sobre essas mudanças, sem pressupor que toda falha produza vibração mais intensa. O percurso acompanha o \href{https://colab.research.google.com/drive/1FdcHGuE1c6JbiSro7K0QYuGb-4w69KOJ?usp=sharing}{\textbf{Colab do projeto}}: conhecer os arquivos, selecionar condições comparáveis, extrair medidas, interpretar os espectros e investigar os eixos da IMU. Esta entrega cobre as análises solicitadas; o treinamento de classificadores fica para a segunda etapa.
 
-O objetivo é investigar como os padrões de vibração variam entre condições de hélices saudáveis e danificadas. No domínio do tempo, serão analisados a intensidade e os extremos dos sinais de aceleração; no domínio da frequência, será investigada a distribuição da vibração entre as frequências. A comparação dos mesmos trechos nos dois domínios permitirá avaliar o que cada análise acrescenta e quais características fornecem informação semelhante.
+\subsection{Dataset e recorte de comparação}
+O DronePropB reúne ensaios em solo com hélices saudáveis e defeituosas~\cite{dataset}. O inventário do notebook encontrou 111 arquivos MATLAB: todos têm o piezo \texttt{AccData.Vib\_Data}; 108 têm também a IMU triaxial \texttt{IMUData.Vib\_Data} e a tensão da bateria, usada apenas na verificação da Seção~\ref{sec:comp}. As taxas declaradas são 10~kHz no piezo e 1~kHz na IMU. Adotamos aceleração em $\U$, conforme orientação registrada no notebook; a média próxima de $g$ no eixo $z$ da IMU é consistente com essa unidade.
 
-\section{Dataset, seleção e preparação dos sinais}
-\subsection{Dos experimentos aos arquivos de medição}
-O primeiro passo foi identificar quais medições permitem comparar condições de hélices sem misturar configurações de operação. A seção 1 do notebook \texttt{ProjetoSinaisESistemas.ipynb} inventaria os \textbf{111 arquivos MATLAB v5} do DronePropB, inspeciona suas estruturas e constrói uma tabela com os códigos dos experimentos, a data, os sensores disponíveis, as taxas declaradas, os comprimentos e as durações nominais.
+Os nomes codificam condição/grupo de falha (F), severidade (SV), configuração de velocidade (SP), código C e, nos saudáveis, repetição (R). F0/SV0 representa a condição saudável; F1--F3 e SV1--SV3 identificam grupos de falha e severidades, sem atribuir percentuais de dano. O significado físico de C, a rotação em RPM e a orientação dos sensores não foram estabelecidos. Portanto, mantemos SP e C constantes e não atribuímos causas mecânicas específicas aos picos.
 
-Os nomes seguem o padrão \texttt{F*\_SV*\_SP*\_C*}, com sufixo \texttt{\_R*} nos registros repetidos. No notebook, \texttt{F0/SV0} identifica a condição saudável; \texttt{F1}--\texttt{F3}, três grupos de falha; \texttt{SV1}--\texttt{SV3}, os níveis de severidade; e \texttt{SP}, a configuração de velocidade. Esses números não representam diretamente percentuais de dano ou RPM, e a descrição física de cada grupo de falha não foi estabelecida nessa etapa. O significado de \texttt{C} também permanece desconhecido: por precaução, ele é mantido constante na seleção. O drone não é identificado nos nomes dos arquivos.
+A comparação usa \textbf{SP3/C1}, com os 12 registros da Tabela~\ref{tab:registros}. Todos os piezos têm 600\,000 amostras e 60~s. A escolha mantém sensor, taxa, duração e códigos operacionais constantes, cobrindo todas as falhas e severidades. O hash do piezo revelou nove pares de sinais saudáveis idênticos entre C1 e C2 no inventário geral (102 sinais distintos em 111 arquivos); usar somente C1 evita contar essas cópias como novos experimentos.
 
-Há 30 arquivos saudáveis e 27 de cada grupo \texttt{F1}, \texttt{F2} e \texttt{F3}. Para cada combinação de \texttt{SP1}--\texttt{SP3} com \texttt{C1}--\texttt{C3}, existem três arquivos saudáveis (\texttt{R1}--\texttt{R3}) e nove danificados (três grupos de falha $\times$ três severidades). Os três arquivos restantes, \texttt{F0\_SV0\_SP0\_C4\_R1.mat}, \texttt{R2.mat} e \texttt{R3.mat}, contêm apenas o piezo e não têm contraparte danificada nessa configuração.
-
-\subsection{Sensores, unidades e bases de tempo}
-A Tabela~\ref{tab:estrutura} resume as variáveis encontradas. Todos os arquivos contêm \texttt{AccData}; 108 também contêm \texttt{IMUData} e \texttt{BatteryVolt}. As duas primeiras são estruturas com sinal, vetor temporal \texttt{t} e taxa declarada \texttt{samplingRate}; \texttt{AccData} inclui ainda o campo \texttt{DATE}. A tensão da bateria foi inventariada, mas não integra a análise de vibração.
-
-\begin{table}[!t]
-\caption{Sinais disponíveis. $N_p$ e $N_i$ são os comprimentos do piezo e de cada eixo da IMU. As taxas são as declaradas nos arquivos.}
-\label{tab:estrutura}\centering\small\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llll@{}}\toprule
-Sinal & Forma & Taxa [Hz] & Unidade\\\midrule
-\texttt{AccData.Vib\_Data} & $1\times N_p$ & 10\,000 & $\U$\\
-\texttt{IMUData.Vib\_Data} & $3\times N_i$ & 1\,000 & $\U$\\
-\texttt{BatteryVolt} & $1\times N_i$ & 1\,000 & V\\\bottomrule
+\begin{table}[!ht]
+\caption{Seleção SP3/C1. IDs sem extensão .mat. O piezo é uniaxial, a 10~kHz, com 600\,000 amostras por registro. A IMU tem três eixos a 1~kHz; $N_i$ é por eixo e sua duração nominal é $N_i/1000$ segundos.}
+\label{tab:registros}\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llr@{}}\toprule
+Registro & Rótulo & $N_i$\\\midrule
+\texttt{F0\_SV0\_SP3\_C1\_R1} & Saudável & 81\,709\\
+\texttt{F0\_SV0\_SP3\_C1\_R2} & Saudável & 84\,400\\
+\texttt{F0\_SV0\_SP3\_C1\_R3} & Saudável & 81\,933\\
+\texttt{F1\_SV1\_SP3\_C1} & Danificada & 81\,639\\
+\texttt{F1\_SV2\_SP3\_C1} & Danificada & 80\,828\\
+\texttt{F1\_SV3\_SP3\_C1} & Danificada & 80\,784\\
+\texttt{F2\_SV1\_SP3\_C1} & Danificada & 80\,613\\
+\texttt{F2\_SV2\_SP3\_C1} & Danificada & 81\,196\\
+\texttt{F2\_SV3\_SP3\_C1} & Danificada & 80\,706\\
+\texttt{F3\_SV1\_SP3\_C1} & Danificada & 82\,245\\
+\texttt{F3\_SV2\_SP3\_C1} & Danificada & 82\,001\\
+\texttt{F3\_SV3\_SP3\_C1} & Danificada & 81\,033\\\bottomrule
 \end{tabular}
 \end{table}
 
-Adota-se aceleração em $\U$: para o piezo, o notebook registra a informação fornecida pela monitoria; para a IMU, a média próxima da gravidade no terceiro eixo é uma evidência de consistência, sem substituir uma verificação de calibração e orientação. As linhas da IMU são denominadas $x$, $y$ e $z$ no notebook.
+\subsection{Verificação, preparação e janelas}
+A inspeção dos registros completos e da média móvel de 0,5~s não motivou tratamento do piezo. Usamos os \textbf{dados brutos, sem filtro}, preservando o procedimento atual do Colab. A conferência local confirmou valores finitos, comprimentos compatíveis entre sinal e tempo e timestamps crescentes e regulares a 0,1~ms nos 12 piezos. Isso verifica a base temporal, mas não certifica calibração ou ausência de saturação.
 
-No piezo, os comprimentos são 200\,000, 600\,000 e 1\,200\,000 amostras, em 30, 78 e três arquivos, respectivamente: durações nominais de 20, 60 e 120~s. Na IMU, há entre 31\,916 e 94\,846 amostras por eixo, correspondentes a 31,916--94,846~s. A duração nominal é $N/f_s$; o intervalo entre a primeira e a última amostra de uma série regular é um período de amostragem menor.
+Cada registro é dividido em 60 janelas de 1~s (10\,000 amostras), sem sobreposição nem sobras: \textbf{180 saudáveis e 540 danificadas}. Cada linha de características conserva arquivo, condição, F, SV e índice da janela no notebook. A FFT usa esses mesmos trechos. As 720 janelas vêm de apenas 12 aquisições e não são experimentos independentes; os danificados também reúnem grupos e severidades diferentes. Manter SP/C constantes melhora a comparação, mas não demonstra que o dano seja a única causa das diferenças.
 
-O registro saudável \texttt{F0\_SV0\_SP1\_C1\_R1.mat} ilustra a diferença entre sensores (Fig.~\ref{fig:sensores-completo}). O piezo contém 600\,000 amostras, de 0 a 59,9999~s; a IMU contém 82\,344 por eixo, de 0 a 82,343~s. Na combinação posteriormente selecionada, \texttt{SP3/C1}, a IMU é, em média, 21,6~s mais longa que o piezo. Portanto, os sensores não são comparados instante a instante: compartilhar o arquivo e a origem numérica dos tempos não comprova sincronização física.
+\clearpage
+\section{O que a intensidade e os extremos mostram}
+A Fig.~\ref{fig:tempo} compara o mesmo sensor em F0/SV0/R1 e F1/SV3, ambos SP3/C1. O registro completo mostra variações de amplitude; o zoom de 50~ms evidencia oscilações rápidas e a maior amplitude desse exemplo danificado. Os dois sinais compartilham as escalas em cada painel. Essa comparação ilustra um par de registros; a conclusão sobre o conjunto depende das distribuições de todas as janelas.
 
-\begin{figure}[!t]
-\centering\includegraphics[width=\columnwidth]{figuras/sensores_registro_completo.png}
-\caption{Exploração do registro saudável \textnormal{\texttt{F0\_SV0\_SP1\_C1\_R1}}: piezo e três eixos da IMU, sem tratamento. As durações e as escalas verticais diferem entre os painéis. Este registro ilustra a estrutura dos dados e não pertence à seleção principal SP3/C1.}
-\label{fig:sensores-completo}
-\end{figure}
+\fig{01_notebook_tempo}{Piezo bruto: F0/SV0/R1 (saudável) e F1/SV3 (danificada), SP3/C1. Acima, 60~s; abaixo, os primeiros 50~ms. Imagem original do notebook; o título ainda diz ``filtrado, mas o código usa os sinais brutos, sem filtro.}{fig:tempo}
 
-Nesse exemplo, as médias dos eixos $x$, $y$ e $z$ são 0,031, $-0,201$ e 9,718~$\U$, com desvios padrão de 0,679, 0,812 e 1,090~$\U$. No piezo, a média é $-0,0010$ e o desvio padrão, 0,0444~$\U$. O nível contínuo no eixo $z$ mostra por que comparar RMS bruto entre direções pode confundir gravidade e vibração. Esses valores descrevem somente o exemplo, sem estabelecer diferenças gerais entre sensores ou condições de hélice.
+\subsection{Definições e convenções}
+Para uma janela $x[n]$, com $N$ amostras, usamos as definições da Tabela~\ref{tab:def-tempo}. O desvio padrão é populacional, com divisor $N$. Média representa nível contínuo; RMS e potência descrevem intensidade global; desvio mede flutuação em torno da média; os picos descrevem extremos. O fator de crista mede quanto o maior extremo se destaca do RMS. Potência do sinal tem unidade quadrática de aceleração, e não watts.
 
-O zoom de 10,00 a 10,05~s (Fig.~\ref{fig:sensores-zoom}) torna visível a diferença de densidade de amostras: os períodos nominais são 0,1~ms no piezo e 1~ms na IMU. As respectivas frequências de Nyquist são 5\,000 e 500~Hz. A ligação dos pontos por linhas no gráfico não acrescenta medições nem comprova alinhamento entre sensores.
-
-\begin{figure}[!t]
-\centering\includegraphics[width=\columnwidth]{figuras/sensores_zoom.png}
-\caption{Mesmo registro da Fig.~\ref{fig:sensores-completo}, ampliado entre 10,00 e 10,05~s. O piezo e a IMU mantêm suas próprias bases temporais e escalas de aceleração.}
-\label{fig:sensores-zoom}
-\end{figure}
-
-\subsection{Duplicatas e escolha dos registros}
-A contagem de arquivos, por si só, superestima a quantidade de sinais distintos. O notebook calcula uma impressão digital MD5 dos bytes de \texttt{AccData.Vib\_Data} e encontra \textbf{102 sinais piezoelétricos distintos em 111 arquivos}. São nove pares idênticos: para cada velocidade \texttt{SP1}, \texttt{SP2} e \texttt{SP3}, o saudável \texttt{C1/R1}, \texttt{C1/R2} ou \texttt{C1/R3} reaparece em \texttt{C2} com o mesmo sufixo. Não foram encontradas duplicatas entre os registros danificados. Essa verificação se refere ao piezo; não foi demonstrada a identidade das demais variáveis.
-
-Escolheu-se \textbf{SP3/C1}, preservando os três saudáveis e os nove danificados sem reunir as cópias saudáveis de C2. A Tabela~\ref{tab:selecionados} identifica os 12 arquivos e os comprimentos da IMU disponível para a investigação adicional. Todos os piezos selecionados têm um único eixo, 10~kHz, 600\,000 amostras e 60~s, com uso integral do intervalo nominal $[0,60)$~s. Assim, a análise principal mantém constantes os códigos SP e C, o sensor, a taxa e a duração, variando a condição da hélice, o grupo de falha e a severidade.
-
-\begin{table}[!t]
-\caption{Registros selecionados, todos SP3/C1. Os IDs omitem apenas a extensão \textnormal{\texttt{.mat}}. Cada IMU tem três eixos a 1~kHz; o comprimento $N_i$ e a duração são por eixo. O piezo tem os parâmetros comuns descritos no texto.}
-\label{tab:selecionados}\centering\scriptsize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llrr@{}}\toprule
-Arquivo/ID & Condição & $N_i$ & $T_i$ [s]\\\midrule
-\texttt{F0\_SV0\_SP3\_C1\_R1} & Saudável & 81\,709 & 81,709\\
-\texttt{F0\_SV0\_SP3\_C1\_R2} & Saudável & 84\,400 & 84,400\\
-\texttt{F0\_SV0\_SP3\_C1\_R3} & Saudável & 81\,933 & 81,933\\
-\texttt{F1\_SV1\_SP3\_C1} & Danificada & 81\,639 & 81,639\\
-\texttt{F1\_SV2\_SP3\_C1} & Danificada & 80\,828 & 80,828\\
-\texttt{F1\_SV3\_SP3\_C1} & Danificada & 80\,784 & 80,784\\
-\texttt{F2\_SV1\_SP3\_C1} & Danificada & 80\,613 & 80,613\\
-\texttt{F2\_SV2\_SP3\_C1} & Danificada & 81\,196 & 81,196\\
-\texttt{F2\_SV3\_SP3\_C1} & Danificada & 80\,706 & 80,706\\
-\texttt{F3\_SV1\_SP3\_C1} & Danificada & 82\,245 & 82,245\\
-\texttt{F3\_SV2\_SP3\_C1} & Danificada & 82\,001 & 82,001\\
-\texttt{F3\_SV3\_SP3\_C1} & Danificada & 81\,033 & 81,033\\\bottomrule
+\begin{table}[!ht]
+\caption{Características temporais por janela. $A$ denota $\U$; $A^2$ denota $\PU$.}
+\label{tab:def-tempo}\centering\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lll@{}}\toprule
+Medida & Definição & Unidade\\\midrule
+Média & $\mu=N^{-1}\sum_n x[n]$ & $A$\\
+Potência & $P=N^{-1}\sum_n x[n]^2$ & $A^2$\\
+RMS & $\sqrt{P}$ & $A$\\
+Desvio padrão & $\sigma=\sqrt{N^{-1}\sum_n(x[n]-\mu)^2}$ & $A$\\
+Pico absoluto & $a_p=\max_n |x[n]|$ & $A$\\
+Pico a pico & $\max_n x[n]-\min_n x[n]$ & $A$\\
+Fator de crista & $a_p/\mathrm{RMS}$ & 1\\\bottomrule
 \end{tabular}
 \end{table}
 
-O recorte oferece 180~s saudáveis e 540~s danificados de piezo. A IMU está presente nos 12 arquivos, somando durações de 248,042~s saudáveis e 731,045~s danificadas por eixo, ainda sem recorte definido para a investigação adicional. C1 e C2 oferecem 60~s de piezo em cada arquivo de SP1--SP3, enquanto C3 reúne durações desiguais entre condições (140~s saudáveis e 180~s danificados por velocidade). SP3/C1 é, portanto, um recorte com durações uniformes e cobertura de todos os grupos e severidades; a seção não demonstra que SP3 seja superior às demais velocidades.
-
-A escolha do \textbf{piezo para a análise principal} combina a duração uniforme, o eixo único e a maior faixa de frequências disponível. O notebook também o descreve como acelerômetro adicional de alta sensibilidade empregado nos ensaios em solo. Sua justificativa menciona componentes próximas de 130, 270 e 400~Hz; elas motivam a margem em relação à Nyquist da IMU, mas a comprovação espectral pertence à etapa de frequência e não é apresentada nesta seleção. Os três eixos da IMU ficam reservados à investigação adicional.
-
-Esses controles tornam as comparações mais consistentes, mas não isolam causalmente o efeito do dano. A identidade do drone, a montagem e o significado físico de C não foram verificados. Além disso, os nove danificados representam combinações diferentes de falha e severidade, enquanto os três saudáveis têm sufixos de repetição. Os resultados devem ser interpretados dentro desse recorte, sem tratar todas as aquisições como repetições equivalentes de uma única condição.
-
-\subsection{Inspeção e tratamento dos sinais}
-A inspeção dos 12 registros brutos (Fig.~\ref{fig:piezo-brutos}) preserva o contexto de 60~s antes da extração de características. Há variações de amplitude ao longo dos registros; os limites verticais são automáticos por painel, de modo que a altura visual das faixas não permite comparar diretamente a intensidade entre arquivos. A verificação numérica apresentada nessa seção confirma \textbf{zero NaN e 600\,000 amostras em cada piezo selecionado}, além da taxa declarada comum de 10~kHz.
-
-\begin{figure*}[!t]
-\centering\includegraphics[height=0.77\textheight,width=\textwidth,keepaspectratio]{figuras/piezo_registros_brutos.png}
-\caption{Os 12 registros piezoelétricos SP3/C1 antes do tratamento, na ordem da Tabela~\ref{tab:selecionados}. Tempo em segundos e aceleração em $\U$; cada painel tem sua própria escala vertical. A figura documenta a inspeção dos registros completos e não substitui a comparação posterior com escalas comuns.}
-\label{fig:piezo-brutos}
-\end{figure*}
-
-Para examinar a linha de base, calculou-se uma média móvel centrada de 0,5~s (5\,000 amostras), mostrada na Fig.~\ref{fig:linha-base}. Ela revela pequenas variações lentas, aproximadamente entre $-0,02$ e 0,02~$\U$. A média móvel é apenas um diagnóstico; não é subtraída do sinal. Por ser centrada e exigir uma janela completa, ela não produz valores nas extremidades em que faltam amostras.
-
-\begin{figure*}[!t]
-\centering\includegraphics[width=\textwidth]{figuras/piezo_linha_base.png}
-\caption{Linha de base dos piezos selecionados, estimada por média móvel centrada de 0,5~s sobre os dados brutos. As curvas motivam o tratamento das componentes lentas antes do janelamento.}
-\label{fig:linha-base}
-\end{figure*}
-
-Em seguida, o notebook aplica a cada \textbf{registro completo} um filtro Butterworth passa-altas de ordem 4, com corte em 5~Hz, projetado para $f_s=10\,000$~Hz e aplicado por \texttt{filtfilt}, nos sentidos direto e reverso. O objetivo é atenuar a componente contínua e as variações lentas da linha de base. A aplicação nos dois sentidos evita deslocamento de fase, mas eleva ao quadrado a resposta de magnitude do filtro de uma passagem. Os dados brutos e os filtrados são mantidos separadamente.
-
-O tratamento antecede a divisão em janelas, evitando reiniciar o filtro a cada segundo. Não há remoção explícita da média nessa etapa, nem recorte inicial/final: são mantidas todas as amostras filtradas. Assim, as medidas posteriores descrevem predominantemente as flutuações acima do corte; componentes físicas abaixo de 5~Hz também são atenuadas. Os parâmetros de extensão de borda são os padrões da biblioteca, e a influência dos transientes do filtro nas primeiras e últimas janelas ainda precisa ser avaliada.
-
-\pendente{Completar a validação dos registros selecionados quanto a infinitos, saturação, falhas de aquisição, transientes e compatibilidade dos comprimentos de tempo e sinal. Verificar monotonicidade e regularidade dos timestamps e estimar a taxa a partir deles: a seção 1 confere a taxa declarada, mas não a valida pelos tempos. Avaliar os efeitos de borda do passa-altas e documentar eventuais exclusões; se o tratamento mudar, atualizar as contagens.}
-
-\subsection{Janelas e rastreabilidade}
-Cada sinal filtrado é dividido em \textbf{janelas de 1~s, com 10\,000 amostras, sem sobreposição}. O algoritmo conserva apenas janelas completas; como todos os registros têm 600\,000 amostras, não há sobras nem descarte nesta seleção. Resultam 60 janelas por arquivo, totalizando \textbf{720 janelas: 180 saudáveis e 540 danificadas}. Cada grupo F1--F3 contribui com 180 janelas, distribuídas entre suas três severidades.
-
-A duração de 1~s fornece uma grade espectral de $\Delta f=f_s/N=1$~Hz, mantendo 60 observações locais por registro para investigar variações temporais. Esse espaçamento não garante, sozinho, a distinção de componentes próximas nem a estacionariedade de cada trecho. O recorte em janelas é uma etapa distinta da eventual ponderação para a FFT.
-
-O notebook associa cada janela ao arquivo de origem, à condição, aos códigos F e SV e ao índice $k$ (de 0 a 59). No piezo, sensor e eixo são comuns; os índices de amostra e os tempos podem ser reconstruídos como $kN$ até $(k+1)N-1$ e de $k$ até $k+0,9999$~s. A identificação do arquivo permitirá uma futura separação entre treino e teste por registro. As 720 janelas não equivalem a 720 experimentos independentes: provêm de 12 arquivos e preservam o desbalanceamento de três janelas danificadas para cada saudável.
-
-\section{Análise no domínio do tempo}
-\subsection{Características, definições e unidades}
-No domínio do tempo, as características descrevem a intensidade, as flutuações e os extremos dos sinais de aceleração. A Tabela~\ref{tab:tempo-def} apresenta as sete medidas que serão calculadas em cada janela. As medidas de aceleração são consideradas em $\U$. A potência do sinal é uma medida quadrática, em $\mathrm{m}^{2}/\mathrm{s}^{4}$; não equivale à potência mecânica em watts.
-
-\begin{table}[!t]
-\caption{Definições e unidades das características temporais.}
-\label{tab:tempo-def}\centering\small\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{0.20\columnwidth}p{0.62\columnwidth}l@{}}\toprule
-Medida & Definição utilizada & Unidade\\\midrule
-Média & Soma dos valores dividida pela quantidade de amostras; indica o nível contínuo. & $\U$\\[3pt]
-RMS & Raiz quadrada da média dos valores elevados ao quadrado; expressa intensidade global. & $\U$\\[3pt]
-Potência média & Média dos valores elevados ao quadrado. & $\mathrm{m}^{2}/\mathrm{s}^{4}$\\[3pt]
-Desvio padrão & Raiz da média dos desvios em relação à média elevados ao quadrado; descreve flutuação. & $\U$\\[3pt]
-Pico absoluto & Maior valor em módulo, independentemente do sinal. & $\U$\\[3pt]
-Pico a pico & Diferença entre o maior e o menor valor. & $\U$\\[3pt]
-Fator de crista & Pico absoluto dividido pelo RMS; indica quanto o extremo se destaca da intensidade global. & 1\\\bottomrule
+\begin{table}[!ht]
+\caption{Características temporais: média $\pm$ desvio entre janelas. Unidades conforme Tabela~\ref{tab:def-tempo}.}
+\label{tab:tempo}\centering\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrr@{}}\toprule
+Medida & Saudável & Danificada\\\midrule
+Média & $-0,00144\pm0,00125$ & $-0,00170\pm0,00164$\\
+RMS & $0,2729\pm0,0495$ & $0,3046\pm0,1186$\\
+Potência & $0,07691\pm0,02640$ & $0,10682\pm0,07998$\\
+Desvio padrão & $0,2729\pm0,0495$ & $0,3046\pm0,1186$\\
+Pico absoluto & $1,008\pm0,204$ & $1,107\pm0,356$\\
+Pico a pico & $1,886\pm0,380$ & $2,109\pm0,685$\\
+Fator de crista & $3,708\pm0,443$ & $3,755\pm0,509$\\\bottomrule
 \end{tabular}
 \end{table}
 
-Para o desvio padrão, considera-se a janela como população: a média dos desvios quadráticos é dividida pelo total de amostras, sem a correção amostral. Se o RMS for zero, o fator de crista é indefinido e deve ser sinalizado. As definições e unidades devem ser as mesmas nas duas classes.
+\fig{02_notebook_tempo_box}{Distribuições das medidas temporais nas 720 janelas. Caixas: intervalo interquartil e mediana; bigodes: até 1,5 vezes esse intervalo. Os pontos além dos bigodes também são apresentados; nenhuma janela foi excluída desses cálculos.}{fig:tempo-box}
 
-\subsection{Gráficos e tabelas a incorporar}
-\pendente{\textbf{Gráfico temporal saudável $\times$ danificada:} no notebook, plotar a aceleração do mesmo sensor/direção em experimentos com condições comparáveis. Usar painéis alinhados ou curvas sobrepostas com os mesmos limites de tempo/amplitude; incluir um trecho suficientemente amplo e, se necessário, um zoom para mostrar a oscilação. Eixo horizontal: tempo [s]; vertical: aceleração [$\U$]. Identificar arquivos, classes, sensor/direção, intervalo, condições e tratamento. Inserir o gráfico aqui e escrever abaixo o que mudou na amplitude, nos picos e no comportamento temporal, com apoio em medidas.}
+\subsection{Mais vibração nem sempre significa falha}
+A Tabela~\ref{tab:tempo} mostra RMS médio cerca de 12\% maior nos danificados, mas dispersão 2,4 vezes maior. Os boxplots (Fig.~\ref{fig:tempo-box}) têm forte sobreposição; a mediana danificada é até menor. No detalhamento por grupo do Colab, as medianas do RMS são aproximadamente 0,46~$\U$ em F1, 0,25 em F2 e 0,19 em F3, contra 0,28 no saudável. Portanto, a média agrupada esconde comportamentos distintos. O fator de crista quase não muda entre as duas classes, embora varie entre grupos de falha.
 
-\pendente{\textbf{Tabela de características temporais:} calcular no notebook as sete medidas para cada janela, mantendo sua origem. Inserir aqui uma tabela compacta por classe e/ou experimento, com unidade, quantidade de janelas e estatísticas-resumo claramente definidas. Disponibilizar a tabela completa por janela no material reproduzível. Diferenciar o desvio padrão do sinal da dispersão da característica entre janelas.}
+A identidade $P=\mathrm{RMS}^2=\sigma^2+\mu^2$ explica por que RMS, potência e desvio trazem informação semelhante no piezo, cuja média é pequena. O exemplo central de 1~s da IMU $z$ no Colab evidencia o efeito oposto: com $\mu=9,69$ e $\sigma=7,35$~$\U$, o RMS é 12,17~$\U$; removida a média, cai a 7,35~$\U$. A gravidade eleva o RMS sem aumentar a flutuação. Os trechos centrais dos dois sensores não são considerados sincronizados.
 
-\pendente{\textbf{Gráficos comparativos temporais:} produzir no notebook boxplots, histogramas ou equivalentes de \textbf{RMS, desvio padrão, pico absoluto e fator de crista}, ao menos. Usar a mesma convenção por classe, legendas e unidades; indicar se cada observação é uma janela. Inserir aqui um painel compacto e interpretar diferenças, sobreposição, dispersão e variação entre experimentos. Responder expressamente se, nos dados analisados, o defeito está associado a maior intensidade e quais medidas têm comportamento semelhante.}
+\clearpage
+\section{Onde a potência está no espectro}
+\subsection{FFT, magnitude e potência}
+Para cada uma das mesmas 720 janelas, retiramos a média e aplicamos Hann antes da FFT real. O eixo é $f_k=kf_s/N$, de 0 a 5\,000~Hz, com espaçamento $\Delta f=1$~Hz. A magnitude unilateral é $|X_w[k]|/\sum_n w[n]$, dobrada nas frequências com par negativo; DC e Nyquist não são dobradas. A unidade permanece $\U$. A normalização compensa o ganho da Hann para uma senoide centrada em um bin; o Colab a confere com amplitudes 3 e 1 em 120 e 350~Hz. Fora dos bins, o pico pode ser atenuado e espalhado. A Hann reduz vazamento, mas alarga picos: espaçamento da grade não equivale, sozinho, à capacidade de separar componentes.
 
-\subsection{Relações e redundâncias}
-A relação \textbf{potência média = RMS$^2$} mostra que essas duas medidas expressam informação relacionada. O RMS reúne a contribuição da média e das flutuações; o desvio padrão considera apenas a flutuação em torno da média. Por isso, RMS e desvio padrão aproximam-se quando a média está próxima de zero. Uma componente contínua pode elevar o RMS sem aumentar a flutuação na mesma proporção. Essas relações teóricas orientarão a interpretação das características calculadas no dataset.
+Para potência, o notebook usa outra FFT: \textbf{sem Hann}, após retirar a média. Define $q_k=|X[k]|^2/N^2$, com a mesma compensação unilateral. Por Parseval, $\sum_k q_k=\sigma^2$; essa potência exclui a componente média. Não se soma o quadrado da magnitude corrigida pela Hann para estimar potência.
 
-\pendente{No notebook, verificar essas relações e a correlação entre as características. Aqui, completar a interpretação com os valores observados e o efeito do tratamento efetivamente adotado, incluindo a remoção de média, se houver.}
+\fig{03_notebook_espectros}{Média das magnitudes por condição nas mesmas janelas da análise temporal. Escalas linear (acima) e logarítmica (abaixo), na faixa ampliada exibida pelo notebook. A média reúne três registros saudáveis ou nove danificados.}{fig:espectros}
 
-\section{Análise no domínio da frequência}
-\subsection{DFT, eixo de frequências e normalização}
-Para investigar como a vibração se distribui entre frequências, será utilizada a Transformada Discreta de Fourier (DFT), calculada de forma eficiente pela FFT. Em um espectro de magnitude, o eixo horizontal indica a frequência em Hz e a altura de cada ponto representa a amplitude da componente correspondente. Um pico destaca uma componente; sua altura só pode ser comparada entre sinais quando a escala e a normalização são coerentes.
+\subsection{Características e escolha das bandas}
+A partir de 5~Hz, a frequência dominante é o bin de maior magnitude e a magnitude dominante é sua altura. Para centroide e entropia, usamos $p_k=M_k^2/\sum_j M_j^2$, sendo $M_k$ a magnitude com Hann. O centroide $\sum_k f_kp_k$ indica onde se concentra o espectro; a entropia $-\sum_k p_k\log_2p_k/\log_2K$ mede sua dispersão entre $K$ bins, de zero a um.
 
-O eixo de frequências depende da taxa de amostragem, indicada por $f_s$, e da quantidade de amostras do trecho, indicada por $N$. A distância entre os pontos do espectro é a taxa dividida pelo número de amostras. Para sinais reais, pode-se apresentar apenas a metade não negativa do espectro, até a frequência de Nyquist, correspondente à metade da taxa.
+A potência em banda é a soma dos $q_k$ entre limites inclusivo à esquerda e exclusivo à direita. As bandas finais são B1: 5--200~Hz, B2: 200--335~Hz, B3: 335--600~Hz e B4: 600--5\,000~Hz. Elas separam as regiões observadas próximas de 130, 270 e 400~Hz e o conteúdo restante, usando as mesmas fronteiras nas duas condições. Substituem as três bandas preliminares exploradas no início da seção 3.3 do Colab. Frequências abaixo de 5~Hz e o bin exato de Nyquist não entram nas bandas, que por isso não somam exatamente a potência total.
 
-Sem ponderação adicional, uma convenção de amplitude é dividir a magnitude da FFT pelo número de amostras e duplicar as componentes que possuem uma correspondente em frequência negativa. A componente de frequência zero (DC) e a de Nyquist, quando existir, não são duplicadas. Isso evita que o comprimento do trecho, por si só, altere a escala de amplitude apresentada.
+\begin{table}[!ht]
+\caption{Características espectrais: média $\pm$ desvio entre janelas. Potência total e bandas em $\PU$; magnitude em $\U$; frequências em Hz; entropia adimensional.}
+\label{tab:freq}\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrr@{}}\toprule
+Medida & Saudável & Danificada\\\midrule
+Freq. dominante & $243,64\pm130,40$ & $252,40\pm126,28$\\
+Magnitude do pico & $0,2228\pm0,0626$ & $0,2478\pm0,1289$\\
+Potência total AC & $0,07690\pm0,02640$ & $0,10681\pm0,07998$\\
+Centroide & $357,66\pm51,91$ & $367,99\pm62,28$\\
+Entropia & $0,4346\pm0,0662$ & $0,4385\pm0,0542$\\
+B1 & $0,03476\pm0,02073$ & $0,04694\pm0,05174$\\
+B2 & $0,01037\pm0,00639$ & $0,00781\pm0,00459$\\
+B3 & $0,02809\pm0,01264$ & $0,04771\pm0,03098$\\
+B4 & $0,00367\pm0,00108$ & $0,00433\pm0,00266$\\\bottomrule
+\end{tabular}
+\end{table}
 
-\pendente{No notebook, calcular FFT das \textbf{mesmas janelas/sinais} usados no tempo, preservando IDs e usando a taxa e o comprimento de cada série. Aqui, explicar a normalização efetivamente adotada, o tratamento de DC/média e eventual ponderação, como Hann. Se houver Hann, informar como o ganho da ponderação é compensado na amplitude e como a potência é normalizada. Distinguir o recorte em trechos da ponderação aplicada dentro de cada trecho. Se retirar a média, explicar que a potência restante descreve apenas a flutuação. Não duplicar DC/Nyquist.}
+\subsection{Picos e redistribuição}
+Na Fig.~\ref{fig:espectros}, o saudável tem picos em 133~Hz (0,155~$\U$), 266~Hz (0,039) e 400~Hz (0,073). No danificado, destacam-se 128~Hz (0,097) e 375/382~Hz (cerca de 0,060). Os picos do espectro médio agrupado ficam mais baixos quando os registros têm máximos em bins diferentes; isso não implica menor potência. Relações próximas de dobro/triplo e espaçamentos de aproximadamente 60~Hz são observáveis, mas não identificam, por si só, rotação ou origem física.
 
-\subsection{Características espectrais e bandas}
-\textbf{Frequência dominante [Hz]:} frequência em que ocorre o maior pico de magnitude dentro da faixa analisada. É necessário informar essa faixa e se a componente de frequência zero foi excluída. \textbf{Magnitude dominante [$\U$]:} altura desse pico, seguindo a mesma normalização usada no gráfico.
+A Tabela~\ref{tab:freq} revela aumento de cerca de 70\% em B3 e redução de 25\% em B2. A média das frações de potência por janela passa de 38,0\% para 50,7\% em B3; B1 cai de 43,3\% para 36,3\%, B2 de 13,8\% para 8,5\%, e B4 fica próxima de 5\%. Assim, a diferença inclui uma mudança de distribuição, além da intensidade global. O deslocamento de picos é descritivo deste recorte: mesmo código SP não comprova a mesma RPM efetiva, e a Seção~\ref{sec:comp} mostra que ele acompanha a tensão da bateria.
 
-\textbf{Potência em uma banda [$\mathrm{m}^{2}/\mathrm{s}^{4}$]:} parcela da potência concentrada em um intervalo de frequências. Pode ser obtida somando as potências dos pontos do espectro dentro desse intervalo. Uma convenção sem ponderação calcula essas potências pelo quadrado da magnitude da FFT dividido pelo quadrado do número de amostras, com a compensação unilateral já descrita. Se for usada densidade espectral de potência, em $\mathrm{m}^{2}/\mathrm{s}^{4}$/Hz, é preciso integrar ao longo da banda, considerando o espaçamento em Hz. Somar magnitudes não fornece potência.
+\clearpage
+\section{O que muda ao observar e amostrar o sinal}
+\subsection{Duração do trecho e separação dos picos}
+A Fig.~\ref{fig:resolucao} usa o início do \textbf{mesmo registro saudável F0/SV0/SP3/C1/R1}, com Hann e a normalização anterior, em duas durações. Para 0,1~s, $N=1\,000$ e $\Delta f=10$~Hz. Para 2~s, $N=20\,000$ e $\Delta f=0,5$~Hz. A mudança vem do comprimento observado, sem inserir amostras artificiais.
 
-A \textbf{potência espectral total} é a soma das contribuições de todas as frequências. Pela relação de Parseval, com normalização compatível, ela deve corresponder à potência calculada no tempo para o mesmo sinal. Essa correspondência permite conferir o cálculo, sem atribuir significado mecânico em watts ao resultado.
+\fig{04_notebook_resolucao}{FFT dos primeiros 0,1 e 2~s do mesmo piezo. Acima, trecho de 0,1~s; abaixo, trecho de 2~s, ambos até 600~Hz e com escalas comuns. Os pontos indicam os bins calculados.}{fig:resolucao}
 
-\textbf{Centroide espectral [Hz]:} média das frequências, dando maior peso às que concentram mais potência. Para calculá-lo, usa-se a fração da potência total presente em cada ponto como peso. Funciona como um centro da distribuição espectral e não precisa coincidir com um pico.
+\fig{05_notebook_resolucao_zoom}{Detalhe da região dominante para os mesmos dois trechos, conforme o zoom original do notebook.}{fig:resolucao-zoom}
 
-\textbf{Entropia espectral [adimensional]:} descreve quanto a potência está concentrada em poucas frequências ou distribuída entre muitas. Na convenção proposta, usam-se as frações de potência dos pontos analisados: soma-se cada fração multiplicada por seu logaritmo de base 2 e troca-se o sinal. A divisão pelo logaritmo do número de pontos normaliza a medida entre 0 e 1. Valores menores indicam maior concentração e valores maiores, maior espalhamento. Pontos com potência zero não contribuem para a soma; sinais com potência total nula precisam ser sinalizados.
+No trecho curto, a região dominante se espalha entre 130 e 140~Hz, com altura em torno de 0,185~$\U$. No trecho de 2~s, o máximo fica próximo de 134~Hz, em torno de 0,245~$\U$, e aparece estrutura vizinha perto de 136~Hz. A grade curta não permite inspecionar esse detalhe. Frequência fora do bin, vazamento e largura da Hann afetam a posição e a altura observadas; os trechos também não têm exatamente o mesmo conteúdo temporal. Portanto, a diferença não deve ser interpretada como mudança física causada pela FFT.
 
-\pendente{No notebook, extrair por janela frequência e magnitude dominantes, potência total (também solicitada nos slides), \textbf{potência em pelo menos três bandas}, centroide e entropia. Definir e justificar as bandas em Hz após inspecionar os espectros e mantê-las iguais entre classes; evitar dupla contagem dos limites e tratar Nyquist. Aqui, registrar os limites, a faixa de busca, os pesos e a convenção de entropia realmente usados, incluindo normalização, base do logaritmo e tratamento de sinais nulos. Conferir a correspondência entre potência no tempo e no espectro.}
+Trechos longos ajudam a distinguir componentes próximas, mas resumem um intervalo maior e podem misturar variações no tempo. A janela principal de 1~s, com grade de 1~Hz, oferece um compromisso simples entre detalhe espectral e acompanhamento local, sem garantir estacionariedade ou separação de todo par de picos.
 
-\subsection{Gráficos, tabelas e interpretação a incorporar}
-\pendente{\textbf{Espectros de magnitude saudável $\times$ danificada:} produzir no notebook espectros dos mesmos registros/janelas do gráfico temporal. Usar eixos comuns, frequência [Hz] no horizontal e magnitude [$\U$] no vertical, com normalização e tratamento identificados. Exibir a faixa relevante, sem ocultar a faixa calculada, e usar zoom se necessário. Marcar os principais picos com suas frequências. Inserir aqui o gráfico e a interpretação: quais picos/bandas diferem e qual informação não era evidente no tempo. Não atribuir picos a motores, pás ou harmônicos sem evidência de rotação/montagem.}
+\subsection{Redução de taxa e aliasing}
+A segunda experiência conserva os primeiros 2~s desse registro e reduz a taxa de 10\,000 para \textbf{200~Hz}, por um fator 50. Primeiro selecionamos uma amostra a cada 50, \textbf{sem filtro}; depois repetimos a redução com \texttt{resample\_poly}, que inclui antialias. A Fig.~\ref{fig:aliasing} compara os dois casos com o original.
 
-\pendente{\textbf{Tabela de características espectrais:} no notebook, gerar valores por janela e resumos por classe/experimento de todas as medidas, incluindo cada potência de banda. Inserir aqui a tabela compacta, com unidades e estatísticas declaradas; disponibilizar a tabela completa junto ao notebook. Se apresentar espectros médios, explicar a agregação: o pico de um espectro médio não equivale necessariamente à média dos picos das janelas.}
+\fig{06_notebook_aliasing}{Mesmo trecho de 2~s: original, redução sem filtro e redução com antialias. A linha tracejada marca a nova Nyquist de 100~Hz; os sinais reduzidos só possuem espectro até esse limite.}{fig:aliasing}
 
-\pendente{\textbf{Gráficos comparativos espectrais:} produzir no notebook boxplots, histogramas ou equivalentes de frequência dominante, magnitude, potência total, centroide e entropia, além de um painel com as \textbf{potências de todas as bandas escolhidas}. Identificar classes, unidades e dispersão; manter convenções comuns. Inserir aqui os painéis e discutir diferenças, sobreposição e variabilidade entre experimentos, sem inferir utilidade apenas pela diferença das médias.}
+Com $f_s'=200$~Hz, a nova Nyquist é 100~Hz. A componente dominante próxima de 134~Hz ultrapassa esse limite e, sem filtro, reaparece aproximadamente em
+\[
+f_a=|134-200|=66\ \mathrm{Hz}.
+\]
+Outras componentes acima de 100~Hz também se rebatem para 0--100~Hz e se misturam ao conteúdo verdadeiro. Logo, simplesmente reduzir o número de amostras pode produzir uma interpretação errada das frequências presentes.
 
-\subsection{Resolução espectral e duração do trecho}
-O espaçamento entre os pontos de frequência é $\Delta f=f_s/N$: divide-se a taxa de amostragem pela quantidade de amostras do trecho. Como exemplo apenas teórico, trechos de 1 e 2~s fornecem espaçamentos de 1 e 0,5~Hz, respectivamente. Uma observação mais longa permite uma grade mais fina, mas distinguir picos também depende da ponderação e da estabilidade do sinal. Acrescentar zeros ao final do trecho apenas cria mais pontos na grade; não substitui observar o sinal por mais tempo.
+O filtro antialias atenua componentes altas \emph{antes} da redução. O espectro reduzido filtrado preserva aproximadamente o conteúdo abaixo do corte, com transição e atenuação próprias do filtro, e suprime o falso pico forte em 66~Hz. A componente de 134~Hz é perdida: o filtro evita o rebatimento, mas não torna possível representar essa frequência a 200~Hz. A taxa deve ser escolhida a partir da faixa que se deseja preservar, com margem para a transição do filtro; a Nyquist original de 5~kHz dá uma faixa muito maior para esta análise.
 
-\pendente{\textbf{Gráfico de resolução:} no notebook, selecionar \textbf{dois trechos de durações distintas do mesmo registro}, preferencialmente com o mesmo início e condição estável. Calcular as FFTs com convenções iguais. Inserir aqui os dois espectros, em escalas comuns e com zoom da região dos picos, anotando arquivo, intervalo, duração, número de amostras, taxa e espaçamento em Hz de cada trecho. Após a figura, comparar os espaçamentos e os picos efetivamente observados e explicar se a duração alterou a distinção de componentes próximas. Valores teóricos sozinhos não substituem a demonstração.}
+\clearpage
+\section{Comparação entre os domínios}
+% (hoje sem conteúdo) no Overleaf.
+% Requer figuras/09_notebook_comparacao.png (está nesta mesma pasta do repasse).
+% Usa apenas o que já existe no preâmbulo: booktabs e as macros \U e \fig.
 
-\subsection{Amostragem, Nyquist e aliasing}
-O critério de Nyquist exige taxa superior ao dobro da maior frequência a preservar. Na redução da taxa sem filtragem antialias, componentes acima da nova frequência de Nyquist podem se dobrar para frequências mais baixas. Ao manter apenas uma amostra a cada determinado número de amostras, a taxa original é dividida por esse mesmo fator. Em uma redução correta, o filtro antialias deve preceder a subamostragem.
+\section{Comparação entre os domínios}\label{sec:comp}
+As características dos dois domínios vêm das mesmas 720 janelas. Para medir quanto cada uma separa as condições, usamos o $d$ de Cohen (diferença entre as médias, em desvios padrão) e a AUC (probabilidade de uma janela danificada ter valor maior que uma saudável; 0,5 indica nenhuma separação). Acrescentamos a \textbf{fração} da potência em cada banda (potência da banda dividida pela potência total da janela), que descreve a forma do espectro sem depender da intensidade.
 
-\pendente{\textbf{Gráfico de aliasing:} no notebook, escolher sinal/trecho real com componente acima da nova Nyquist; definir o fator de redução e reduzir a taxa sem antialias exclusivamente para demonstrar o efeito. Recalcular o eixo com a nova taxa. Inserir aqui espectros antes/depois, identificando registro, mesmo intervalo temporal, taxas, fator, novas Nyquist e picos. Medir uma componente dobrada e comparar sua posição com a previsão pelo critério de amostragem. Se não houver componente adequada, revisar trecho/fator. Explicar por que a redução correta exige filtro prévio; uma redução que já aplique antialias não substitui esta demonstração.}
-
-\section{Comparação dos domínios e seleção de atributos}
-As características temporais e espectrais foram calculadas nas mesmas 720 janelas dos mesmos 12 registros. Para medir quanto cada uma separa as condições, usamos o $d$ de Cohen (diferença entre as médias, em desvios padrão) e a AUC (probabilidade de uma janela danificada ter valor maior que uma saudável; 0,5 indica nenhuma separação). Além das potências absolutas por banda, calculamos a \textbf{fração} da potência em cada banda (potência da banda dividida pela potência total da janela), que descreve a forma do espectro sem depender da intensidade. A Tabela~\ref{tab:comp} resume os resultados; as bandas citadas são B2 (200--335~Hz) e B3 (335--600~Hz).
-
-\begin{table}[!t]
-\caption{Separação entre condições: $d$ de Cohen e AUC com todas as janelas danificadas juntas, e $d$ de cada grupo de falha em relação às saudáveis.}
+\begin{table}[!ht]
+\caption{Separação entre condições: $d$ de Cohen e AUC com as nove falhas reunidas, e $d$ de cada grupo de falha em relação às janelas saudáveis.}
 \label{tab:comp}\centering\small\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}lrrrrr@{}}\toprule
- & \multicolumn{2}{c}{Todas} & \multicolumn{3}{c}{$d$ por grupo}\\\cmidrule(lr){2-3}\cmidrule(l){4-6}
+ & \multicolumn{2}{c}{Reunidas} & \multicolumn{3}{c}{$d$ por grupo}\\\cmidrule(lr){2-3}\cmidrule(l){4-6}
 Característica & $d$ & AUC & F1 & F2 & F3\\\midrule
-RMS & $0{,}30$ & 0,51 & $+1{,}34$ & $-0{,}16$ & $-0{,}27$\\
-Fator de crista & $0{,}09$ & 0,52 & $-0{,}88$ & $+0{,}41$ & $+0{,}61$\\\midrule
-Freq. dominante & $0{,}07$ & 0,31 & $-1{,}25$ & $+1{,}07$ & $+0{,}23$\\
-Centroide & $0{,}17$ & 0,56 & $-1{,}61$ & $+1{,}57$ & $+0{,}71$\\
-Entropia & $0{,}07$ & 0,53 & $-0{,}92$ & $+0{,}56$ & $+0{,}49$\\
-Fração em B2 & $-1{,}38$ & 0,27 & $-1{,}45$ & $-0{,}79$ & $-0{,}98$\\
-Fração em B3 & $0{,}69$ & 0,69 & $-0{,}85$ & $+3{,}06$ & $+1{,}30$\\\bottomrule
+RMS & $+0,30$ & 0,51 & $+1,34$ & $-0,16$ & $-0,27$\\
+Fator de crista & $+0,09$ & 0,52 & $-0,88$ & $+0,41$ & $+0,61$\\\midrule
+Freq. dominante & $+0,07$ & 0,31 & $-1,25$ & $+1,07$ & $+0,23$\\
+Centroide & $+0,17$ & 0,56 & $-1,61$ & $+1,57$ & $+0,71$\\
+Entropia & $+0,07$ & 0,53 & $-0,92$ & $+0,56$ & $+0,49$\\
+Fração em B2 & $-1,38$ & 0,27 & $-1,45$ & $-0,79$ & $-0,98$\\
+Fração em B3 & $+0,69$ & 0,69 & $-0,85$ & $+3,06$ & $+1,30$\\\bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{A classe danificada não é homogênea.} Com as nove falhas reunidas, o RMS praticamente não separa as condições ($d=0{,}30$; AUC $=0{,}51$). Separando por grupo, os efeitos têm sentidos opostos: F1 aumenta a intensidade (RMS: $d=+1{,}34$) e concentra a energia nas baixas frequências; F2 mantém a intensidade ($d=-0{,}16$) e desloca a energia para B3 ($d=+3{,}06$); F3 fica entre os dois. Nenhum domínio é superior em todos os casos: as medidas de intensidade destacam F1, e as de distribuição da energia destacam F2 e F3.
+Com as nove falhas reunidas, o RMS não separa as condições ($d=0,30$; AUC $=0,51$). A Tabela~\ref{tab:comp} mostra o motivo: os grupos de falha têm efeitos de sentidos opostos. F1 aumenta a intensidade (RMS: $d=+1,34$) e concentra a potência nas baixas frequências; F2 mantém a intensidade e tem muito mais potência em B3 ($d=+3,06$); F3 fica entre os dois. Nenhum domínio é superior em todos os casos: as medidas de intensidade destacam F1, e as de distribuição da potência destacam F2 e F3.
 
-\begin{figure*}[!t]
-\centering\includegraphics[width=0.92\textwidth]{figuras/comparacao_dominios.png}
-\caption{(a) RMS (tempo) contra a fração da potência em 335--600~Hz (frequência); cada ponto é uma janela de 1~s do piezo, SP3/C1. (b) Frequência do pico entre 100 e 160~Hz contra a tensão média da bateria; cada ponto é um registro. Os quadrados são os nove registros danificados de SP3/C2, usados apenas nesta verificação.}
-\label{fig:comp}
-\end{figure*}
+\fig{09_notebook_comparacao}{(a) RMS (tempo) contra a fração da potência em B3 (frequência); cada ponto é uma janela de 1~s. (b) Frequência do pico entre 100 e 160~Hz contra a tensão média da bateria; cada ponto é um registro. Os quadrados são os nove registros danificados de SP3/C2, usados apenas nesta verificação.}{fig:comp}
 
-\textbf{Achado 1: mesma intensidade, espectros diferentes.} Na Fig.~\ref{fig:comp}(a), janelas com o mesmo RMS têm distribuições de energia muito distintas. Entre as janelas com RMS na faixa central das saudáveis (0,24 a 0,31~$\U$), a fração média em B3 é 36\% nas saudáveis, 17\% em F1 e 74\% em F2. O tempo mede quanto o sinal vibra; a frequência mostra onde essa energia está.
+\subsection{Mesma intensidade, espectros diferentes}
+Na Fig.~\ref{fig:comp}(a), janelas com o mesmo RMS têm distribuições de potência muito distintas. Entre as janelas com RMS na faixa central das saudáveis (0,24 a 0,31~$\U$), a fração média em B3 é 36\% nas saudáveis, 17\% em F1 e 74\% em F2. O tempo mede quanto o sinal vibra; a frequência mostra onde essa potência está.
 
-\textbf{Achado 2: a posição dos picos acompanha a bateria.} O deslocamento do pico principal (133 para 128~Hz na média das danificadas) é invisível no tempo, pois equivale a 0,3~ms no período. Porém, a frequência desse pico acompanha a tensão da bateria registrada nos arquivos (Fig.~\ref{fig:comp}(b)): $r=0{,}992$ nos 12 registros de C1 e $r=0{,}995$ com os nove registros danificados de C2 ($\approx 7$~Hz/V). Os saudáveis foram gravados com 15,4 a 15,5~V e os danificados com 14,3 a 15,3~V; a mesma falha F1/SV1 tem o pico em 130,1~Hz a 14,97~V (C1) e em 135,1~Hz a 15,65~V (C2), acima dos saudáveis. Assim, o deslocamento dos picos é explicado pela tensão da bateria e, com estes dados, não pode ser atribuído ao defeito. O padrão é compatível com variação da rotação dos motores, que o dataset não informa.
+\subsection{A posição dos picos acompanha a bateria}
+O deslocamento do pico principal (133~Hz nos saudáveis; 128~Hz, em média, nos danificados) é invisível no tempo: equivale a 0,3~ms no período. Porém, a frequência desse pico acompanha a tensão da bateria registrada nos arquivos (Fig.~\ref{fig:comp}(b)): $r=0,992$ nos 12 registros e $r=0,995$ ao incluir os nove registros danificados de SP3/C2, cerca de 7~Hz/V. Os saudáveis foram gravados com 15,4 a 15,5~V e os danificados com 14,3 a 15,3~V. A mesma falha F1/SV1 tem o pico em 130,1~Hz a 14,97~V (C1) e em 135,1~Hz a 15,65~V (C2), acima dos saudáveis. Com estes dados, o deslocamento é explicado pela tensão da bateria e não pode ser atribuído ao defeito. O padrão é compatível com variação da rotação dos motores, que o dataset não informa.
 
-\textbf{Redundância e conjunto para a classificação.} RMS, desvio padrão, potência média, potência espectral total, picos e magnitude do pico dominante medem a mesma intensidade ($r \geq 0{,}92$ entre janelas); as potências absolutas por banda também a acompanham ($r$ de 0,76 a 0,99 com o RMS). A fração em B1 e o centroide são redundantes com a fração em B3 ($r=-0{,}97$ e $+0{,}90$). Propomos, para a segunda entrega: modelo temporal com \textbf{RMS e fator de crista}; modelo espectral com \textbf{frações em B2 e B3 e entropia espectral}; e modelo combinado com as cinco. A frequência dominante e a frequência do pico ficam fora por acompanharem a bateria. Todas as características mínimas continuam extraídas e analisadas.
+\subsection{Redundância e características para a classificação}
+RMS, desvio padrão, potência média, potência espectral total, picos e magnitude do pico dominante medem a mesma intensidade ($r\geq0,92$ entre janelas), e as potências absolutas por banda a acompanham ($r$ de 0,76 a 0,99 com o RMS). A fração em B1 e o centroide são redundantes com a fração em B3 ($r=-0,97$ e $+0,90$). Para a segunda entrega, propomos: modelo temporal com \textbf{RMS e fator de crista}; modelo espectral com \textbf{frações em B2 e B3 e entropia}; modelo combinado com as cinco. A frequência dominante fica fora por alternar entre dois picos e acompanhar a bateria. A fração em B3 também se relaciona com a tensão, de forma mais fraca ($r\approx-0,6$ por registro): registramos isso como risco de confusão a acompanhar na classificação.
 
-\textbf{Limitações.} As 720 janelas vêm de 12 registros, dos quais três são saudáveis, e estes diferem entre si em grau semelhante à diferença entre condições. A tensão da bateria difere sistematicamente entre as classes e também se relaciona, de forma mais fraca, com a fração em B3 ($r\approx-0{,}6$ por registro), o que registramos como risco de confusão.
+\section{Investigação adicional: a direção faz diferença?}
+\textbf{Pergunta:} as vibrações nos eixos $x$, $y$ e $z$ da IMU têm as mesmas características, e a diferença saudável--danificada aparece igualmente nas três direções? A pergunta verifica o que se perde ao observar uma única direção e qual eixo merece atenção em uma aplicação futura.
 
-\section{Investigação adicional do grupo}
-Além da comparação entre hélices saudáveis e danificadas, as três séries de aceleração da IMU permitem investigar como a intensidade e a distribuição em frequência variam entre direções. Essa análise será feita dentro de um mesmo experimento, mantendo a condição da hélice e de operação como referência.
+\subsection{Método e cuidados}
+Usamos as IMUs dos mesmos 12 registros SP3/C1, a 1~kHz, com Nyquist de 500~Hz. Diferentemente do piezo, aplicamos passa-altas Butterworth de ordem 4, corte em 5~Hz, por \texttt{filtfilt} no registro completo de cada eixo, antes do janelamento. Isso atenua gravidade e variações lentas, sem deslocamento de fase; a aplicação nos dois sentidos também modifica a resposta de magnitude. O filtro não retira apenas gravidade e pode afetar bordas.
 
-\pendente{\textbf{Pergunta proposta, a confirmar com o grupo:} ``As três direções da IMU apresentam a mesma intensidade e distribuição espectral em um mesmo experimento?'' Justificar sua relevância e escolher, entre as IMUs já inventariadas na Tabela~\ref{tab:selecionados}, o registro e o trecho efetivamente usados. Validar orientação, taxa própria e intervalo comum; calcular características temporais e/ou espectrais com a mesma convenção nos três eixos.}
+As janelas têm 1~s, ou 1\,000 amostras. Para reduzir a influência dos trechos iniciais de baixa atividade, o Colab retém, por registro/eixo, janelas com RMS acima de 30\% da mediana. Essa é uma heurística de atividade, não uma confirmação do estado do motor. Das 2\,919 janelas completas somadas entre eixos, 101 foram excluídas; restam \textbf{2\,818}: 237 saudáveis por eixo e 703 danificadas em $x/y$, 701 em $z$. Sobras inferiores a 1~s não entram. Como a seleção é por eixo, os conjuntos não são inteiramente pareados.
 
-\pendente{\textbf{Gráficos e resposta da investigação:} produzir no notebook curvas temporais com a mesma escala entre eixos e boxplots de intensidade por janela e/ou espectros comparativos com frequências/unidades identificadas. Inserir aqui os gráficos e uma tabela compacta com as medidas relevantes. Explicar o que os resultados respondem à pergunta, controlar a influência da média quando comparar RMS e concluir explicitamente, com referência às evidências e sem generalizar além dos experimentos analisados.}
+Os tempos são crescentes e os dados finitos. Em F1/SV2 e F1/SV3 há um intervalo isolado de 2~ms na IMU; os resultados mantêm a FFT nominal de 1~kHz do Colab, uma aproximação a considerar. Não alinhamos IMU e piezo instante a instante. B1/B2 são mantidas e B3 fica limitada aos bins disponíveis até 500~Hz; B4 não é interpretada na IMU.
 
-\section{Conclusões e material reproduzível}
-O DronePropB oferece sinais de aceleração que permitem analisar padrões de vibração de drones nos domínios do tempo e da frequência. A série do sensor piezoelétrico e as três séries da IMU permitem investigar a intensidade global e a distribuição da vibração entre frequências e direções. Os métodos apresentados servirão de base para comparar condições de hélices saudáveis e danificadas.
+\begin{table}[!ht]
+\caption{IMU após tratamento: médias por condição (S: saudável; D: danificada). RMS em $\U$, centroide em Hz. $d$ compara RMS entre condições no mesmo eixo.}
+\label{tab:imu}\centering\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrr@{}}\toprule
+Eixo & RMS S & RMS D & Centr. S & Centr. D & $d$ RMS\\\midrule
+$x$ & 2,267 & 2,536 & 280,7 & 290,2 & 0,58\\
+$y$ & 1,964 & 2,666 & 272,9 & 242,0 & 1,21\\
+$z$ & 5,502 & 7,295 & 319,8 & 346,3 & 1,42\\\bottomrule
+\end{tabular}
+\end{table}
 
-\pendente{Aqui, redigir a conclusão após receber os resultados: retomar o objetivo, resumir os dois achados comprovados, responder à investigação adicional, discutir sobreposição/limitações e justificar a utilidade dos atributos. Não afirmar maior vibração por defeito, deslocamentos de picos, diferenças entre eixos ou separação de classes sem resultados que sustentem essas conclusões.}
+\fig{07_notebook_imu_box}{IMU: distribuições após filtragem e seleção de atividade. Azul: saudável; vermelho: danificada. Os eixos são identificados por x, y e z em cada painel. As diferenças de intensidade e centroide dependem do eixo.}{fig:imu-box}
 
+\fig{08_notebook_imu_espectros}{Espectros médios da IMU por eixo e condição, nos três painéis originais do notebook, com escalas comuns. Os pesos das componentes variam entre direções; a faixa observável termina em 500~Hz.}{fig:imu-espectros}
+
+\subsection{Resposta à pergunta}
+\textbf{Não, os eixos não têm as mesmas características.} Mesmo após atenuar a gravidade, o RMS saudável em $z$ é 2,4--2,8 vezes o de $x/y$ (Tabela~\ref{tab:imu}, Fig.~\ref{fig:imu-box}). A distribuição espectral também muda: $z$ dá mais peso à região de 390--400~Hz e tem centroide mais alto (Fig.~\ref{fig:imu-espectros}). A diferença entre condições não aparece igualmente: o aumento médio de RMS é cerca de 12\% em $x$, 36\% em $y$ e 33\% em $z$; o centroide cai em $y$ e sobe em $z$.
+
+A potência em B3 aumenta nas três direções, com $d=1,48$, 0,97 e 1,44 para $x$, $y$ e $z$. O eixo $z$ se destaca no RMS e no centroide, enquanto $x$ tem o maior efeito em B3: não há um eixo universalmente melhor. A limitação de 500~Hz e o antialias de aquisição não verificado impedem descartar contaminação por frequências mais altas. Os efeitos dependem também da montagem e dos trechos retidos, sem validação de classificação.
+
+\section{Conclusões}
+A análise mostra dois aspectos complementares: a intensidade média muda, com sobreposição entre condições, e a potência se redistribui entre bandas, sobretudo B2 e B3. Os experimentos de duração e taxa mostram por que a leitura dos picos depende da observação e da amostragem. A comparação entre domínios mostra que janelas de mesma intensidade podem ter espectros distintos e que a posição dos picos acompanha a tensão da bateria, o que impede atribuí-la ao defeito. A IMU confirma que a direção altera intensidade e distribuição espectral. Esses achados justificam testar atributos temporais e bandas na próxima etapa, respeitando os poucos registros, a diversidade das falhas e a separação por aquisição.
+
+O \href{https://colab.research.google.com/drive/1FdcHGuE1c6JbiSro7K0QYuGb-4w69KOJ?usp=sharing}{\textbf{Colab com código, gráficos e tabelas}} contém o percurso completo até a extração; não apresentamos resultados de classificação nesta entrega.
+
+\begin{thebibliography}{1}
+\bibitem{dataset} DronePropB, \emph{Ground Testing Dataset for Commercial Drones with Defective Propellers}, Mendeley Data, v.~1. DOI: \href{https://doi.org/10.17632/xkvfjmm8zg.1}{10.17632/xkvfjmm8zg.1}.
+\end{thebibliography}
 \end{document}

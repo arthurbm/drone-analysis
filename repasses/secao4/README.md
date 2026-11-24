@@ -14,16 +14,27 @@ A seção 4.4 lê também os nove registros danificados de SP3/C2, a partir da t
 
 ## Overleaf
 
-1. Envie `comparacao_dominios.png` para a pasta `figuras/` do projeto.
-2. Substitua a seção "Comparação dos domínios e seleção de atributos" pelo conteúdo de `relatorio_secao4.tex`.
-3. Compile. O trecho ocupa cerca de meia página de texto, uma tabela de uma coluna e uma figura de largura inteira (`figure*`).
+1. Envie `09_notebook_comparacao.png` para a pasta `figuras/` do projeto.
+2. Substitua a linha `\section{Comparação entre os domínios}`, hoje sem conteúdo, pelo conteúdo de `relatorio_secao4.tex`.
+3. Faça os três ajustes abaixo em outras seções, para que o relatório não contradiga a seção nova.
+4. Compile. O trecho ocupa cerca de uma coluna de texto, uma tabela e uma figura de uma coluna (macro `\fig`).
 
-O trecho ainda não foi compilado: confira a tabela e a posição da figura na primeira compilação.
+O trecho ainda não foi compilado: confira a tabela e a posição da figura na primeira compilação. Se faltar espaço, a Tabela `tab:comp` é o primeiro corte possível; os números principais dela estão repetidos no texto.
+
+### Ajustes em outras seções
+
+| Onde | Trecho atual | Trocar por |
+|---|---|---|
+| Seção I, "Dataset e recorte de comparação" | `e a tensão da bateria, que não é usada aqui.` | `e a tensão da bateria, usada apenas na verificação da Seção~\ref{sec:comp}.` |
+| Seção III, "Picos e redistribuição" | `mesmo código SP não comprova a mesma RPM efetiva.` | `mesmo código SP não comprova a mesma RPM efetiva, e a Seção~\ref{sec:comp} mostra que ele acompanha a tensão da bateria.` |
+| Conclusões | `A IMU confirma que a direção altera intensidade e distribuição espectral.` | `A comparação entre domínios mostra que janelas de mesma intensidade podem ter espectros distintos e que a posição dos picos acompanha a tensão da bateria, o que impede atribuí-la ao defeito. A IMU confirma que a direção altera intensidade e distribuição espectral.` |
+
+A cópia local `relatorio/overleaf/Projeto_Sinais_26_2/conference_101719.tex` já está com o trecho e os três ajustes aplicados, e serve de referência.
 
 ## Arquivos
 
 | Arquivo | Destino |
 |---|---|
 | `colab_celulas.ipynb` | Colab do grupo, seção 4 |
-| `relatorio_secao4.tex` | Overleaf, seção de comparação dos domínios |
-| `comparacao_dominios.png` | Overleaf, `figuras/`; é gerada pela última célula de código da seção 4.4 como `comp_dominios_relatorio.png` |
+| `relatorio_secao4.tex` | Overleaf, seção "Comparação entre os domínios" |
+| `09_notebook_comparacao.png` | Overleaf, `figuras/`; é gerada pela última célula de código da seção 4.4 do notebook, com esse mesmo nome |
