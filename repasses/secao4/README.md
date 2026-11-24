@@ -15,11 +15,11 @@ A seção 4.4 lê também os nove registros danificados de SP3/C2, a partir da t
 ## Overleaf
 
 1. Envie `09_notebook_comparacao.png` para a pasta `figuras/` do projeto.
-2. Substitua a linha `\section{Comparação entre os domínios}`, hoje sem conteúdo, pelo conteúdo de `relatorio_secao4.tex`.
+2. Apague a linha `\section{Comparação entre os domínios}`, hoje sem conteúdo, e cole no lugar dela o conteúdo de `relatorio_secao4.tex`, que já traz o título da seção.
 3. Faça os três ajustes abaixo em outras seções, para que o relatório não contradiga a seção nova.
-4. Compile. O trecho ocupa cerca de uma coluna de texto, uma tabela e uma figura de uma coluna (macro `\fig`).
+4. Compile. O trecho ocupa quase duas colunas, cerca de uma página: uma coluna de texto e títulos, a Tabela `tab:comp` (cerca de 0,3 coluna) e a figura (cerca de 0,5 coluna).
 
-O trecho ainda não foi compilado: confira a tabela e a posição da figura na primeira compilação. Se faltar espaço, a Tabela `tab:comp` é o primeiro corte possível; os números principais dela estão repetidos no texto.
+O trecho ainda não foi compilado: confira a tabela, a figura e o limite de 6 páginas. Se faltar espaço, remova a Tabela `tab:comp` antes da figura, que é a que sustenta os dois achados; nesse caso, troque a frase "A Tabela~\ref{tab:comp} mostra o motivo:" por "O motivo é que" (os valores de $d$ citados no texto continuam valendo).
 
 ### Ajustes em outras seções
 
@@ -27,7 +27,7 @@ O trecho ainda não foi compilado: confira a tabela e a posição da figura na p
 |---|---|---|
 | Seção I, "Dataset e recorte de comparação" | `e a tensão da bateria, que não é usada aqui.` | `e a tensão da bateria, usada apenas na verificação da Seção~\ref{sec:comp}.` |
 | Seção III, "Picos e redistribuição" | `mesmo código SP não comprova a mesma RPM efetiva.` | `mesmo código SP não comprova a mesma RPM efetiva, e a Seção~\ref{sec:comp} mostra que ele acompanha a tensão da bateria.` |
-| Conclusões | `A IMU confirma que a direção altera intensidade e distribuição espectral.` | `A comparação entre domínios mostra que janelas de mesma intensidade podem ter espectros distintos e que a posição dos picos acompanha a tensão da bateria, o que impede atribuí-la ao defeito. A IMU confirma que a direção altera intensidade e distribuição espectral.` |
+| Conclusões | `A IMU confirma que a direção altera intensidade e distribuição espectral.` | `A comparação entre domínios mostra que janelas de mesma intensidade podem ter espectros distintos e que a posição dos picos acompanha a tensão da bateria, o que impede atribuir esse deslocamento ao defeito. A IMU confirma que a direção altera intensidade e distribuição espectral.` |
 
 A cópia local `relatorio/overleaf/Projeto_Sinais_26_2/conference_101719.tex` já está com o trecho e os três ajustes aplicados, e serve de referência.
 
