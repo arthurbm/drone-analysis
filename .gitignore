@@ -1,3 +1,4 @@
 *.zip
+.venv/
 # repositório git local próprio (conversas do grupo, rascunhos, exploração): não vai para o GitHub
 workspace/

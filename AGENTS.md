@@ -4,7 +4,7 @@ Projeto de CIN0020 (Sinais e Sistemas, CIn/UFPE): análise de vibração de dron
 
 ## Fontes de verdade
 
-- **Notebook:** o Google Colab compartilhado do grupo é o oficial; `ProjetoSinaisESistemas.ipynb` é uma cópia. Toda mudança no notebook sai daqui como **repasse**.
+- **Notebook:** o Google Colab compartilhado do grupo é o oficial; `analise_vibracao_drones.ipynb` é uma cópia. Toda mudança no notebook sai daqui como **repasse**.
 - **Relatório:** o Overleaf do grupo é o oficial; `relatorio/overleaf/` é uma cópia. Mudança no relatório também sai como repasse.
 - **Requisitos:** `docs/enunciado/enunciado.pdf` decide o que é exigido em cada entrega; `slides.pdf` é o resumo dado em aula.
 - **Vocabulário:** `GLOSSARY.md`. Os termos de lá valem para notebook, relatório e mensagens.

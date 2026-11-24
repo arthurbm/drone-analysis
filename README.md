@@ -8,7 +8,7 @@ Equipe: Ana Maria Cunha, Mateus Ferreira Borges e Arthur Britto.
 
 | Caminho | O que é |
 |---|---|
-| `ProjetoSinaisESistemas.ipynb` | Notebook completo da 1ª entrega (seções 1 a 5), com código, gráficos e interpretações |
+| `analise_vibracao_drones.ipynb` | Notebook completo da 1ª entrega (seções 1 a 5), com código, gráficos e interpretações |
 | `relatorio/` | Relatório da 1ª entrega em PDF e os fontes em LaTeX (modelo IEEE) |
 | `repasses/` | Pacotes prontos para colar no Colab e no Overleaf do grupo, que são as versões oficiais do notebook e do relatório |
 | `docs/enunciado/` | Enunciado oficial (`enunciado.pdf`) e slides de apresentação do projeto (`slides.pdf`) |
@@ -17,13 +17,16 @@ Equipe: Ana Maria Cunha, Mateus Ferreira Borges e Arthur Britto.
 
 ## Como executar
 
-**No Google Colab (recomendado):** abra `ProjetoSinaisESistemas.ipynb` no Colab e use *Ambiente de execução → Executar tudo*. A primeira célula baixa o dataset (≈ 500 MB) com `gdown` e o descompacta em `/content/dados/`. O notebook não precisa de GPU.
+**No Google Colab (recomendado):** abra `analise_vibracao_drones.ipynb` no Colab e use *Ambiente de execução → Executar tudo*. A primeira célula baixa o dataset (≈ 500 MB) com `gdown` e o descompacta em `/content/dados/`. O notebook não precisa de GPU.
 
-**Localmente:** os caminhos do notebook apontam para `/content/`, que é a pasta do Colab. Para rodar fora dele, instale as dependências, baixe o dataset e ajuste os dois caminhos da primeira célula e o padrão de busca da célula de exploração (`/content/dados/**/*.mat`).
+**Localmente:** as dependências são gerenciadas com [uv](https://docs.astral.sh/uv/) (`pyproject.toml` e `uv.lock`).
 
 ```bash
-pip install -r requirements.txt
+uv sync
+uv run jupyter lab analise_vibracao_drones.ipynb
 ```
+
+Os caminhos do notebook apontam para `/content/`, que é a pasta do Colab. Para rodar fora dele, baixe o dataset e ajuste os dois caminhos da primeira célula e o padrão de busca da célula de exploração (`/content/dados/**/*.mat`).
 
 ## Dataset
 

@@ -15,4 +15,4 @@ Cada repasse é uma pasta `repasses/<assunto>/` com:
 - `relatorio_<assunto>.tex`: o trecho do relatório, usando apenas pacotes e macros já presentes no preâmbulo;
 - as figuras que o trecho usa, com o mesmo nome que terão na pasta `figuras/` do Overleaf.
 
-As mesmas células e o mesmo trecho também são aplicados às cópias locais (`ProjetoSinaisESistemas.ipynb` e `relatorio/overleaf/`), para que o repositório mostre o resultado completo.
+As mesmas células e o mesmo trecho também são aplicados às cópias locais (`analise_vibracao_drones.ipynb` e `relatorio/overleaf/`), para que o repositório mostre o resultado completo.
