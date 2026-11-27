@@ -5,6 +5,7 @@ As versões oficiais do notebook e do relatório ficam no Google Colab e no Over
 | Repasse | O que leva |
 |---|---|
 | [`secao4/`](secao4/) | Seção 4 do notebook e do relatório: comparação dos domínios, dois achados e conjunto de características para a classificação |
+| [`ajustes-outras-secoes/`](ajustes-outras-secoes/) | Correções pontuais nas seções 1, 2, 3 e 5 do notebook e no relatório: frases que o achado da bateria contradiz, números defasados e acabamento |
 
 ## Formato
 

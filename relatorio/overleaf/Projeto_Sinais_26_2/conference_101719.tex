@@ -63,7 +63,7 @@ Cada registro é dividido em 60 janelas de 1~s (10\,000 amostras), sem sobreposi
 \section{O que a intensidade e os extremos mostram}
 A Fig.~\ref{fig:tempo} compara o mesmo sensor em F0/SV0/R1 e F1/SV3, ambos SP3/C1. O registro completo mostra variações de amplitude; o zoom de 50~ms evidencia oscilações rápidas e a maior amplitude desse exemplo danificado. Os dois sinais compartilham as escalas em cada painel. Essa comparação ilustra um par de registros; a conclusão sobre o conjunto depende das distribuições de todas as janelas.
 
-\fig{01_notebook_tempo}{Piezo bruto: F0/SV0/R1 (saudável) e F1/SV3 (danificada), SP3/C1. Acima, 60~s; abaixo, os primeiros 50~ms. Imagem original do notebook; o título ainda diz ``filtrado, mas o código usa os sinais brutos, sem filtro.}{fig:tempo}
+\fig{01_notebook_tempo}{Piezo bruto: F0/SV0/R1 (saudável) e F1/SV3 (danificada), SP3/C1. Acima, 60~s; abaixo, os primeiros 50~ms.}{fig:tempo}
 
 \subsection{Definições e convenções}
 Para uma janela $x[n]$, com $N$ amostras, usamos as definições da Tabela~\ref{tab:def-tempo}. O desvio padrão é populacional, com divisor $N$. Média representa nível contínuo; RMS e potência descrevem intensidade global; desvio mede flutuação em torno da média; os picos descrevem extremos. O fator de crista mede quanto o maior extremo se destaca do RMS. Potência do sinal tem unidade quadrática de aceleração, e não watts.
@@ -101,7 +101,7 @@ Fator de crista & $3,708\pm0,443$ & $3,755\pm0,509$\\\bottomrule
 \fig{02_notebook_tempo_box}{Distribuições das medidas temporais nas 720 janelas. Caixas: intervalo interquartil e mediana; bigodes: até 1,5 vezes esse intervalo. Os pontos além dos bigodes também são apresentados; nenhuma janela foi excluída desses cálculos.}{fig:tempo-box}
 
 \subsection{Mais vibração nem sempre significa falha}
-A Tabela~\ref{tab:tempo} mostra RMS médio cerca de 12\% maior nos danificados, mas dispersão 2,4 vezes maior. Os boxplots (Fig.~\ref{fig:tempo-box}) têm forte sobreposição; a mediana danificada é até menor. No detalhamento por grupo do Colab, as medianas do RMS são aproximadamente 0,46~$\U$ em F1, 0,25 em F2 e 0,19 em F3, contra 0,28 no saudável. Portanto, a média agrupada esconde comportamentos distintos. O fator de crista quase não muda entre as duas classes, embora varie entre grupos de falha.
+A Tabela~\ref{tab:tempo} mostra RMS médio cerca de 12\% maior nos danificados, mas dispersão 2,4 vezes maior. Os boxplots (Fig.~\ref{fig:tempo-box}) têm forte sobreposição; a mediana danificada é até menor. No detalhamento por grupo do Colab, as medianas do RMS são aproximadamente 0,46~$\U$ em F1, 0,25 em F2 e 0,20 em F3, contra 0,28 no saudável. Portanto, a média agrupada esconde comportamentos distintos. O fator de crista quase não muda entre as duas classes, embora varie entre grupos de falha.
 
 A identidade $P=\mathrm{RMS}^2=\sigma^2+\mu^2$ explica por que RMS, potência e desvio trazem informação semelhante no piezo, cuja média é pequena. O exemplo central de 1~s da IMU $z$ no Colab evidencia o efeito oposto: com $\mu=9,69$ e $\sigma=7,35$~$\U$, o RMS é 12,17~$\U$; removida a média, cai a 7,35~$\U$. A gravidade eleva o RMS sem aumentar a flutuação. Os trechos centrais dos dois sensores não são considerados sincronizados.
 
@@ -215,9 +215,9 @@ Os tempos são crescentes e os dados finitos. Em F1/SV2 e F1/SV3 há um interval
 \label{tab:imu}\centering\small\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrrrr@{}}\toprule
 Eixo & RMS S & RMS D & Centr. S & Centr. D & $d$ RMS\\\midrule
-$x$ & 2,267 & 2,536 & 280,7 & 290,2 & 0,58\\
-$y$ & 1,964 & 2,666 & 272,9 & 242,0 & 1,21\\
-$z$ & 5,502 & 7,295 & 319,8 & 346,3 & 1,42\\\bottomrule
+$x$ & 2,267 & 2,536 & 280,6 & 289,1 & 0,58\\
+$y$ & 1,964 & 2,666 & 272,9 & 241,8 & 1,21\\
+$z$ & 5,502 & 7,295 & 319,8 & 346,1 & 1,42\\\bottomrule
 \end{tabular}
 \end{table}
 
